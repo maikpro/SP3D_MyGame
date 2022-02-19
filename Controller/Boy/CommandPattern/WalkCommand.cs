@@ -1,8 +1,9 @@
+using Camera.Player.CommandPattern;
 using UnityEngine;
 
 public class WalkCommand : ICommand
 {
-    public const string walkParameterName = "isWalking";
+    public const string walkParameterName = "isRunning";
     
     private Vector3 moveDirection;
     private Rigidbody rigidbody;
@@ -33,8 +34,13 @@ public class WalkCommand : ICommand
                                                                               
         // RotateTowards von A nach B und Winkel (Rotationsgeschwindigkeit!)
         transform.rotation = Quaternion.RotateTowards(this.transform.rotation, toRotation, this.rotateSpeed * Time.deltaTime);
-        animator.SetBool(walkParameterName, true); //Animation beim Gehen
-
+        
+        // Walk Animation
+        this.animator.SetBool(walkParameterName, true); //Animation beim Gehen
+        
+        // Boxing Animation
+        this.animator.SetBool(BoxingCommand.boxingParameterName, false);
+        
         if (this.rigidbody.velocity.magnitude < this.maxAcceleration)
         {
             //this.rigidbody.AddForce(this.moveDirection, ForceMode.Impulse);

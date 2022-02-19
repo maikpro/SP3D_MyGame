@@ -1,3 +1,4 @@
+using Camera.Player.CommandPattern;
 using UnityEngine;
 
 public class JumpCommand : ICommand
@@ -24,5 +25,8 @@ public class JumpCommand : ICommand
     {
         this.rigidbody.AddForce(Vector3.up * jumpSpeed, ForceMode.Impulse);
         this.animator.SetBool(jumpParameterName, true);
+        
+        // Boxing Animation
+        this.animator.SetBool(BoxingCommand.boxingParameterName, false);
     }
 }

@@ -21,7 +21,8 @@ namespace Camera.Player.CommandPattern
         private void Idle()
         {
             this.rigidbody.AddForce(Vector3.zero, ForceMode.Acceleration);
-            animator.SetBool(WalkCommand.walkParameterName, false);
+            this.animator.SetBool(WalkCommand.walkParameterName, false);
+            this.animator.SetBool(BoxingCommand.boxingParameterName, false);
         }
     }
 }

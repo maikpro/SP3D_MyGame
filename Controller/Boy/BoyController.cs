@@ -50,7 +50,6 @@ public class BoyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
         CameraPosition();
         InputHandler();
 
@@ -68,11 +67,18 @@ public class BoyController : MonoBehaviour
             this.command = new IdleCommand(this.boyRigidbody, this.animator); 
         }
         
+        // JUMP
         if (Input.GetKeyDown(KeyCode.Space) && this.isGrounded)
         {
             this.command = new JumpCommand(this.boyRigidbody, this.animator, this.JumpSpeed);
         }
-
+        
+        // BOXING / FIGHTING
+        if (Input.GetMouseButton(0))
+        {
+            this.command = new BoxingCommand(this.animator);
+        }
+        
         this.command.Execute();
     }
 
