@@ -4,10 +4,12 @@ namespace Camera.Player.CommandPattern
 {
     public class IdleCommand : ICommand
     {
+        private Rigidbody rigidbody;
         private Animator animator;
 
-        public IdleCommand(Animator animator)
+        public IdleCommand(Rigidbody rigidbody, Animator animator)
         {
+            this.rigidbody = rigidbody;
             this.animator = animator;
         }
 
@@ -18,6 +20,7 @@ namespace Camera.Player.CommandPattern
 
         private void Idle()
         {
+            this.rigidbody.AddForce(Vector3.zero, ForceMode.Acceleration);
             animator.SetBool(WalkCommand.walkParameterName, false);
         }
     }

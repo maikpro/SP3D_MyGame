@@ -6,16 +6,21 @@ using UnityEngine;
 public class BoyController : MonoBehaviour
 {
     // Zuweisung per Unity Editor
-    public Transform Camera;
-    public float Acceleration;
+    [SerializeField]
+    private Transform Camera;
+    [Space]
+    [SerializeField]
+    public float MaxAcceleration;
+    [SerializeField]
     public float RotateSpeed;
+    [SerializeField]
+    [Space]
     public float JumpSpeed;
 
     // Privat
     private Animator animator;
     private Vector3 moveDirection;
-    private CharacterController characterController;
-    private float yGravity;
+    private Rigidbody boyRigidbody;
 
     // Steuerung
     private float xDirection;
@@ -38,48 +43,36 @@ public class BoyController : MonoBehaviour
     void Start()
     {
         this.animator = GetComponent<Animator>();
-        this.characterController = GetComponent<CharacterController>();
         this.boyRespawner = new Respawn(gameObject, transform.position);
+        this.boyRigidbody = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        this.isGrounded = this.characterController.isGrounded;
         
         CameraPosition();
         InputHandler();
-        UpdateGrounded();
-        
+
         this.boyRespawner.afterFall(transform.position.y, -20);
 
         // Geh-Richtung
         this.moveDirection = (this.cameraForward * this.yDirection + this.cameraRight * this.xDirection);
-        float magnitude = Mathf.Clamp01(this.moveDirection.magnitude) * this.Acceleration;
-        this.moveDirection.Normalize();
-
-        // Schwerkraft
-        this.yGravity += Physics.gravity.y * Time.deltaTime; 
-        Vector3 velocity = this.moveDirection * magnitude;
-        velocity.y = this.yGravity;
-
+        
         // GEHEN
         if (moveDirection != Vector3.zero)
         {
-            this.command = new WalkCommand(this.moveDirection, this.characterController, this.transform, this.animator, velocity, this.RotateSpeed);
+            this.command = new WalkCommand(this.moveDirection, this.boyRigidbody, this.transform, this.animator, this.RotateSpeed, this.MaxAcceleration);
         }  else
         {
-            this.command = new IdleCommand(this.animator); 
+            this.command = new IdleCommand(this.boyRigidbody, this.animator); 
         }
         
         if (Input.GetKeyDown(KeyCode.Space) && this.isGrounded)
         {
-            Debug.Log("dewedgwe");
-            this.command = new JumpCommand(this.characterController, this.animator, this.JumpSpeed, velocity);
+            this.command = new JumpCommand(this.boyRigidbody, this.animator, this.JumpSpeed);
         }
 
-        
-        
         this.command.Execute();
     }
 
@@ -104,20 +97,22 @@ public class BoyController : MonoBehaviour
         this.cameraRight = this.cameraRight.normalized;
     }
 
-    private void UpdateGrounded()
+    private void OnCollisionEnter(Collision other)
     {
-        this.isGrounded = this.characterController.isGrounded;
-
-       // Debug.Log(this.isGrounded);
-        
-        if (this.isGrounded)
+        if (other.gameObject.CompareTag("Ground"))
         {
+            this.isGrounded = true;
             this.animator.SetBool("isJumping", false);
             this.animator.SetBool("isFalling", false);
             this.animator.SetBool("Grounded", true);
         }
-        else
+    }
+
+    private void OnCollisionExit(Collision other)
+    {
+        if (other.gameObject.CompareTag("Ground"))
         {
+            this.isGrounded = false;
             this.animator.SetBool("isFalling", true);
             this.animator.SetBool("Grounded", false);
         }

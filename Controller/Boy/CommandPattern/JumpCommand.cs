@@ -4,17 +4,15 @@ public class JumpCommand : ICommand
 {
     public const string jumpParameterName = "isJumping";
 
-    private CharacterController characterController;
+    private Rigidbody rigidbody;
     private Animator animator;
     private float jumpSpeed;
-    private Vector3 velocity;
 
-    public JumpCommand(CharacterController characterController, Animator animator, float jumpSpeed, Vector3 velocity)
+    public JumpCommand(Rigidbody rigidbody, Animator animator, float jumpSpeed)
     {
-        this.characterController = characterController;
+        this.rigidbody = rigidbody;
         this.animator = animator;
         this.jumpSpeed = jumpSpeed;
-        this.velocity = velocity;
     }
 
     public void Execute()
@@ -24,9 +22,7 @@ public class JumpCommand : ICommand
 
     private void Jump()
     {
-        Debug.Log("JUMP");
-        this.velocity.y = jumpSpeed;
+        this.rigidbody.AddForce(Vector3.up * jumpSpeed, ForceMode.Impulse);
         this.animator.SetBool(jumpParameterName, true);
-        this.characterController.Move(this.velocity * Time.deltaTime);
     }
 }

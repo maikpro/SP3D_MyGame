@@ -5,20 +5,20 @@ public class WalkCommand : ICommand
     public const string walkParameterName = "isWalking";
     
     private Vector3 moveDirection;
-    private CharacterController characterController;
+    private Rigidbody rigidbody;
     private Transform transform;
     private Animator animator;
-    private Vector3 velocity;
     private float rotateSpeed;
+    private float maxAcceleration;
 
-    public WalkCommand(Vector3 moveDirection, CharacterController characterController, Transform transform, Animator animator, Vector3 velocity, float rotateSpeed)
+    public WalkCommand(Vector3 moveDirection, Rigidbody rigidbody, Transform transform, Animator animator, float rotateSpeed, float maxAcceleration)
     {
         this.moveDirection = moveDirection;
-        this.characterController = characterController;
+        this.rigidbody = rigidbody;
         this.transform = transform;
         this.animator = animator;
-        this.velocity = velocity;
         this.rotateSpeed = rotateSpeed;
+        this.maxAcceleration = maxAcceleration;
     }
 
     public void Execute()
@@ -34,8 +34,11 @@ public class WalkCommand : ICommand
         // RotateTowards von A nach B und Winkel (Rotationsgeschwindigkeit!)
         transform.rotation = Quaternion.RotateTowards(this.transform.rotation, toRotation, this.rotateSpeed * Time.deltaTime);
         animator.SetBool(walkParameterName, true); //Animation beim Gehen
-        
-        
-        this.characterController.Move(this.velocity * Time.deltaTime);
+
+        if (this.rigidbody.velocity.magnitude < this.maxAcceleration)
+        {
+            //this.rigidbody.AddForce(this.moveDirection, ForceMode.Impulse);
+            this.rigidbody.velocity = this.moveDirection * maxAcceleration;
+        }
     }
 }
