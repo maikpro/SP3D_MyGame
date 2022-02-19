@@ -22,7 +22,7 @@ namespace Camera.Player.CommandPattern
         {
             this.rigidbody.AddForce(Vector3.zero, ForceMode.Acceleration);
             this.animator.SetBool(WalkCommand.walkParameterName, false);
-            this.animator.SetBool(BoxingCommand.boxingParameterName, false);
+            this.animator.SetBool(AttackCommand.attackParameterName, false);
         }
     }
 }

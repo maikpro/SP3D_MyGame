@@ -39,7 +39,7 @@ public class WalkCommand : ICommand
         this.animator.SetBool(walkParameterName, true); //Animation beim Gehen
         
         // Boxing Animation
-        this.animator.SetBool(BoxingCommand.boxingParameterName, false);
+        this.animator.SetBool(AttackCommand.attackParameterName, false);
         
         if (this.rigidbody.velocity.magnitude < this.maxAcceleration)
         {

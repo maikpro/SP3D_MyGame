@@ -27,6 +27,6 @@ public class JumpCommand : ICommand
         this.animator.SetBool(jumpParameterName, true);
         
         // Boxing Animation
-        this.animator.SetBool(BoxingCommand.boxingParameterName, false);
+        this.animator.SetBool(AttackCommand.attackParameterName, false);
     }
 }

@@ -76,7 +76,7 @@ public class BoyController : MonoBehaviour
         // BOXING / FIGHTING
         if (Input.GetMouseButton(0))
         {
-            this.command = new BoxingCommand(this.animator);
+            this.command = new AttackCommand(this.animator);
         }
         
         this.command.Execute();
