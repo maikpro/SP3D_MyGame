@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DefaultNamespace.Controller.Boy;
+using UnityEngine;
 
 namespace DefaultNamespace
 {
@@ -20,6 +21,7 @@ namespace DefaultNamespace
 
         public void SetStartPosition(Vector3 startPosition)
         {
+            Debug.Log(startPosition);
             this.startPosition = startPosition;
         }
 
@@ -28,12 +30,16 @@ namespace DefaultNamespace
             this.respawnObject = respawnObject;
         }
 
-        public void afterFall(float currentYPosition, float yPositionToRespawn)
+        public bool afterFall(float currentYPosition, float yPositionToRespawn)
         {
+            Debug.Log(currentYPosition);
             if (currentYPosition <= yPositionToRespawn)
             {
                 Execute();
+                return true;
             }
+
+            return false;
         }
     }
 }

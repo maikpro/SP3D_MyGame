@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Camera.Player.CommandPattern
 {
@@ -7,7 +8,6 @@ namespace Camera.Player.CommandPattern
         public const string attackParameterName = "isAttacking";
 
         private Animator animator;
-        private float strength;
 
         public AttackCommand(Animator animator)
         {
@@ -21,8 +21,8 @@ namespace Camera.Player.CommandPattern
 
         private void Attacking()
         {
-            Debug.Log("Attack!");
             this.animator.SetBool(attackParameterName, true);
+            
         }
     }
 }

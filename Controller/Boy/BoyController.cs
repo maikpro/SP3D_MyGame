@@ -1,10 +1,15 @@
 using System;
 using Camera.Player.CommandPattern;
-using DefaultNamespace;
+using DefaultNamespace.Controller.Boy;
 using UnityEngine;
 
 public class BoyController : MonoBehaviour
 {
+    private GameLogic gameLogic;
+    
+    //EVENTS
+    public event Action<bool, int> OnActionEvent;
+    
     // Zuweisung per Unity Editor
     [SerializeField]
     private Transform Camera;
@@ -22,6 +27,11 @@ public class BoyController : MonoBehaviour
     private Vector3 moveDirection;
     private Rigidbody boyRigidbody;
 
+    private Player player;
+
+    public string text;
+
+
     // Steuerung
     private float xDirection;
     private float yDirection;
@@ -34,26 +44,38 @@ public class BoyController : MonoBehaviour
     private ICommand command;
     
     // Respawn 
-    private Respawn boyRespawner;
+    //private Respawn boyRespawner;
     
     // Is PLayer Grounded?
     private bool isGrounded;
+
+    public Player Player
+    {
+        get => player;
+        set => player = value;
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         this.animator = GetComponent<Animator>();
-        this.boyRespawner = new Respawn(gameObject, transform.position);
+        //this.boyRespawner = new Respawn(gameObject, transform.position);
         this.boyRigidbody = GetComponent<Rigidbody>();
+        //this.player = new Player(new Life(5, false), false);
+        this.gameLogic = GameObject.Find("GameLogic").GetComponent<GameLogic>();
+        this.player = this.gameLogic.Player;
+        
+        this.text = "Hello from BoyController: Player Lives: " + this.player.Life.Counter;
     }
 
     // Update is called once per frame
     void Update()
     {
+        //OnActionEvent?.Invoke(true, 213);
         CameraPosition();
         InputHandler();
 
-        this.boyRespawner.afterFall(transform.position.y, -20);
+        //this.boyRespawner.afterFall(transform.position.y, -20);
 
         // Geh-Richtung
         this.moveDirection = (this.cameraForward * this.yDirection + this.cameraRight * this.xDirection);
@@ -64,7 +86,8 @@ public class BoyController : MonoBehaviour
             this.command = new WalkCommand(this.moveDirection, this.boyRigidbody, this.transform, this.animator, this.RotateSpeed, this.MaxAcceleration);
         }  else
         {
-            this.command = new IdleCommand(this.boyRigidbody, this.animator); 
+            this.command = new IdleCommand(this.boyRigidbody, this.animator);
+            this.player.IsAttacking = false;
         }
         
         // JUMP
@@ -77,6 +100,7 @@ public class BoyController : MonoBehaviour
         if (Input.GetMouseButton(0))
         {
             this.command = new AttackCommand(this.animator);
+            this.player.IsAttacking = true;
         }
         
         this.command.Execute();
@@ -105,6 +129,8 @@ public class BoyController : MonoBehaviour
 
     private void OnCollisionEnter(Collision other)
     {
+        Debug.Log(gameObject.name + " collided with " + other.gameObject.name);
+        
         if (other.gameObject.CompareTag("Ground"))
         {
             this.isGrounded = true;
