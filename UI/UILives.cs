@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,7 +8,7 @@ public class UILives : MonoBehaviour
 
     public void SetLivesText(int livesText)
     {
-        GetComponent<Text>().text = livesText.ToString();
+        GetComponent<Text>().text = "x" + livesText.ToString();
     }
 
     // Start is called before the first frame update
@@ -18,27 +16,20 @@ public class UILives : MonoBehaviour
     {
         // IMPORTANT GAMELOGIC MUST BE SET BEFORE!!!
         this.gameLogic = GameObject.Find("GameLogic").GetComponent<GameLogic>();
-        
+
         //Start Lives
         Debug.Log(this.gameLogic.Player);
         SetLivesText(this.gameLogic.Player.LifeCounter());
-        
+
         //After Falling
-        
-        gameLogic.OnFall += GameLogicOnFall;
+
+        this.gameLogic.OnLifeUpdate += GameLogicOnLifeUpdate;
     }
 
-    private void GameLogicOnFall()
+    private void GameLogicOnLifeUpdate()
     {
-        // Nachdem der Boy von der Platform fällt aktualisiere die Lebensanzeige
+        // aktualisiere die Lebensanzeige
         int currentLives = this.gameLogic.Player.Life.Counter;
         SetLivesText(currentLives);
-    }
-    
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

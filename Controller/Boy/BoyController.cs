@@ -97,7 +97,7 @@ public class BoyController : MonoBehaviour
         }
         
         // BOXING / FIGHTING
-        if (Input.GetMouseButton(0))
+        if (Input.GetKey(KeyCode.Q))
         {
             this.command = new AttackCommand(this.animator);
             this.player.IsAttacking = true;
