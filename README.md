@@ -5,4 +5,5 @@
 - [ ] Enemy AI (3.3)
 - [ ] 1st Level Design (4.3)
 - [ ] Exploding boxes (5.3)
+- [ ] Sound Effects (5.3)
 - [ ] Video for presentation (6.3)
