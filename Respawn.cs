@@ -32,7 +32,6 @@ namespace DefaultNamespace
 
         public bool afterFall(float currentYPosition, float yPositionToRespawn)
         {
-            Debug.Log(currentYPosition);
             if (currentYPosition <= yPositionToRespawn)
             {
                 Execute();

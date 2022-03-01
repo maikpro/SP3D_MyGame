@@ -84,7 +84,7 @@ public class DoozyController : MonoBehaviour
             BoyController boyController = other.gameObject.GetComponent<BoyController>();
             if (boyController.Player.IsAttacking)
             {
-                Debug.Log(other.gameObject.name + "  attacks " + gameObject.name);
+                //Debug.Log(other.gameObject.name + "  attacks " + gameObject.name);
                 this.enemy.IsHit = true; 
             }
             else

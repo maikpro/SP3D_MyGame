@@ -26,12 +26,9 @@ public class BoyController : MonoBehaviour
     private Animator animator;
     private Vector3 moveDirection;
     private Rigidbody boyRigidbody;
-
+    private CapsuleCollider capsuleCollider;
     private Player player;
-
-    public string text;
-
-
+    
     // Steuerung
     private float xDirection;
     private float yDirection;
@@ -42,12 +39,6 @@ public class BoyController : MonoBehaviour
 
     // Command Pattern
     private ICommand command;
-    
-    // Respawn 
-    //private Respawn boyRespawner;
-    
-    // Is PLayer Grounded?
-    private bool isGrounded;
 
     public Player Player
     {
@@ -62,15 +53,19 @@ public class BoyController : MonoBehaviour
         //this.boyRespawner = new Respawn(gameObject, transform.position);
         this.boyRigidbody = GetComponent<Rigidbody>();
         //this.player = new Player(new Life(5, false), false);
+
+        this.capsuleCollider = GetComponent<CapsuleCollider>();
         this.gameLogic = GameObject.Find("GameLogic").GetComponent<GameLogic>();
         this.player = this.gameLogic.Player;
-        
-        this.text = "Hello from BoyController: Player Lives: " + this.player.Life.Counter;
     }
 
     // Update is called once per frame
     void Update()
     {
+        IsGrounded();
+        //Debug.Log(this.isGrounded);
+        //Debug.Log(IsGrounded());
+        
         //OnActionEvent?.Invoke(true, 213);
         CameraPosition();
         InputHandler();
@@ -91,7 +86,7 @@ public class BoyController : MonoBehaviour
         }
         
         // JUMP
-        if (Input.GetKeyDown(KeyCode.Space) && this.isGrounded)
+        if (Input.GetKeyDown(KeyCode.Space) && IsGrounded())
         {
             this.command = new JumpCommand(this.boyRigidbody, this.animator, this.JumpSpeed);
         }
@@ -127,26 +122,30 @@ public class BoyController : MonoBehaviour
         this.cameraRight = this.cameraRight.normalized;
     }
 
-    private void OnCollisionEnter(Collision other)
+    //Codemonkey Tutorial ISGrounded Methode: https://www.youtube.com/watch?v=c3iEl5AwUF8
+    private bool IsGrounded()
     {
-        Debug.Log(gameObject.name + " collided with " + other.gameObject.name);
-        
-        if (other.gameObject.CompareTag("Ground"))
+        float extraHeight = .25f;
+        bool hit = Physics.Raycast(this.capsuleCollider.bounds.center, Vector3.down, this.capsuleCollider.bounds.extents.y + extraHeight);
+
+        Color rayColor;
+
+        if (hit)
         {
-            this.isGrounded = true;
+            rayColor = Color.green;
             this.animator.SetBool("isJumping", false);
             this.animator.SetBool("isFalling", false);
             this.animator.SetBool("Grounded", true);
         }
-    }
-
-    private void OnCollisionExit(Collision other)
-    {
-        if (other.gameObject.CompareTag("Ground"))
+        else
         {
-            this.isGrounded = false;
+            rayColor = Color.red;
             this.animator.SetBool("isFalling", true);
             this.animator.SetBool("Grounded", false);
         }
+        
+        Debug.DrawRay(this.capsuleCollider.bounds.center, Vector3.down*(this.capsuleCollider.bounds.extents.y + extraHeight), rayColor);
+
+        return hit;
     }
 }

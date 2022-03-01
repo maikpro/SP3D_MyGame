@@ -21,11 +21,14 @@ public class GameLogic : MonoBehaviour
     public event Action OnLifeUpdate; // Action for Respawn after Falling 
     public event Action OnCollect; // Action for Collection of Gems
 
+    // TODO Destroy Objects
     
-    // TODO RESPAWNER EVENT!!
     // TODO OnDead Animation
     // TODO Fight with Enemy
+    
     // TODO Checkpoints
+    
+    // TODO RESPAWNER EVENT!!
     
     
     public Player Player
