@@ -1,20 +1,18 @@
 using System;
 using DefaultNamespace.Controller.Boy;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class ObjectController : MonoBehaviour
+public class DestructableObject : MonoBehaviour
 {
-    [SerializeField]
-    private bool breakable;
-
     [SerializeField] 
-    private GameObject brokenBox;
+    private GameObject brokenObject;
 
-
-
+    [SerializeField] private float dissolveTime;
+    
     private void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.CompareTag("Player") && this.breakable)
+        if (other.gameObject.CompareTag("Player"))
         {
             Player player = other.gameObject.GetComponent<BoyController>().Player;
             //Debug.Log("Player collided with box");
@@ -22,7 +20,7 @@ public class ObjectController : MonoBehaviour
             if (player.IsAttacking)
             {
                 Destroy(this.gameObject);
-                GameObject brokenPieces = Instantiate(this.brokenBox, transform.position, transform.rotation) as GameObject;
+                GameObject brokenPieces = Instantiate(this.brokenObject, transform.position, transform.rotation) as GameObject;
 
                 foreach (Transform child in brokenPieces.transform)
                 {
@@ -32,7 +30,7 @@ public class ObjectController : MonoBehaviour
                     }
                 }
                 
-                Destroy(brokenPieces, 2f);
+                Destroy(brokenPieces, this.dissolveTime);
             }
         }
     }
