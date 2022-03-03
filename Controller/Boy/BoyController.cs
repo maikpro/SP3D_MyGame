@@ -22,12 +22,19 @@ public class BoyController : MonoBehaviour
     [Space]
     public float JumpSpeed;
 
+    [Space] [Header("Attack")] 
+    [SerializeField]
+    private Transform attackPoint;
+    [SerializeField] private float attackRange;
+    [SerializeField] private LayerMask attackLayers;
+    
     // Privat
     private Animator animator;
     private Vector3 moveDirection;
     private Rigidbody boyRigidbody;
     private CapsuleCollider capsuleCollider;
     private Player player;
+    private bool grounded;
     
     // Steuerung
     private float xDirection;
@@ -46,13 +53,16 @@ public class BoyController : MonoBehaviour
         set => player = value;
     }
 
+    public Rigidbody BoyRigidbody
+    {
+        get => boyRigidbody; // Für Knockback beim Enemy Hit
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         this.animator = GetComponent<Animator>();
-        //this.boyRespawner = new Respawn(gameObject, transform.position);
         this.boyRigidbody = GetComponent<Rigidbody>();
-        //this.player = new Player(new Life(5, false), false);
 
         this.capsuleCollider = GetComponent<CapsuleCollider>();
         this.gameLogic = GameObject.Find("GameLogic").GetComponent<GameLogic>();
@@ -62,15 +72,11 @@ public class BoyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        IsGrounded();
-        //Debug.Log(this.isGrounded);
-        //Debug.Log(IsGrounded());
+        this.grounded = GroundChecker.IsGrounded(this.capsuleCollider);
+        GroundedAnimation();
         
-        //OnActionEvent?.Invoke(true, 213);
         CameraPosition();
         InputHandler();
-
-        //this.boyRespawner.afterFall(transform.position.y, -20);
 
         // Geh-Richtung
         this.moveDirection = (this.cameraForward * this.yDirection + this.cameraRight * this.xDirection);
@@ -86,15 +92,16 @@ public class BoyController : MonoBehaviour
         }
         
         // JUMP
-        if (Input.GetKeyDown(KeyCode.Space) && IsGrounded())
+        if (Input.GetKeyDown(KeyCode.Space) && this.grounded)
         {
             this.command = new JumpCommand(this.boyRigidbody, this.animator, this.JumpSpeed);
         }
         
         // BOXING / FIGHTING
-        if (Input.GetKey(KeyCode.Q))
+        // Input.GetKey(KeyCode.Q
+        if (Input.GetKey(KeyCode.Mouse1))
         {
-            this.command = new AttackCommand(this.animator);
+            this.command = new AttackCommand(this.animator, this.attackPoint, this.attackRange, this.attackLayers);
             this.player.IsAttacking = true;
         }
         
@@ -122,30 +129,24 @@ public class BoyController : MonoBehaviour
         this.cameraRight = this.cameraRight.normalized;
     }
 
-    //Codemonkey Tutorial ISGrounded Methode: https://www.youtube.com/watch?v=c3iEl5AwUF8
-    private bool IsGrounded()
+    void GroundedAnimation()
     {
-        float extraHeight = .25f;
-        bool hit = Physics.Raycast(this.capsuleCollider.bounds.center, Vector3.down, this.capsuleCollider.bounds.extents.y + extraHeight);
-
-        Color rayColor;
-
-        if (hit)
+        if (this.grounded)
         {
-            rayColor = Color.green;
             this.animator.SetBool("isJumping", false);
             this.animator.SetBool("isFalling", false);
             this.animator.SetBool("Grounded", true);
         }
         else
         {
-            rayColor = Color.red;
             this.animator.SetBool("isFalling", true);
             this.animator.SetBool("Grounded", false);
         }
-        
-        Debug.DrawRay(this.capsuleCollider.bounds.center, Vector3.down*(this.capsuleCollider.bounds.extents.y + extraHeight), rayColor);
-
-        return hit;
+    }
+    
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireSphere(this.attackPoint.position, this.attackRange);
     }
 }

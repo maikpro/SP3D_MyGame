@@ -8,9 +8,12 @@ public class GameLogic : MonoBehaviour
     // EDITOR VARIABLES
     [Header("Player Settings")]
     [SerializeField]
+    [Range(1,99)]
     private int playerLifeCounter;
 
-    [SerializeField] private int gemsCollected;
+    [SerializeField] 
+    [Range(1,99)]
+    private int gemsCollected;
     
     //PRIVATE FIELDS
     private BoyController boyController;
@@ -21,11 +24,9 @@ public class GameLogic : MonoBehaviour
     public event Action OnLifeUpdate; // Action for Respawn after Falling 
     public event Action OnCollect; // Action for Collection of Gems
 
-    // TODO Destroy Objects
-    
     // TODO OnDead Animation
     // TODO Fight with Enemy
-    
+
     // TODO Checkpoints
     
     // TODO RESPAWNER EVENT!!
@@ -62,8 +63,6 @@ public class GameLogic : MonoBehaviour
         this.boyRespawner = new Respawn(this.boyController.gameObject, transform.position);
         this.boyRespawner.SetStartPosition(new Vector3(219.809998f,0f,2.41199994f));
         
-        
-        
         // Spawn Enemies
     }
 
@@ -73,16 +72,16 @@ public class GameLogic : MonoBehaviour
         // Respawn after Falling down
         if (this.boyRespawner.afterFall(this.boyController.gameObject.transform.position.y, -20))
         {
-            //minus life
-            this.player.TakesDamage(1);
-            OnLifeUpdate?.Invoke();
+            MinusLife();
         }
+        
+    }
 
-        
-        
-        // Check Player Lives with Events
-        
-
+    public void MinusLife()
+    {
+        //minus life
+        this.player.TakesDamage(1);
+        OnLifeUpdate?.Invoke();
     }
 
     private void BonusLife()

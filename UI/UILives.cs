@@ -18,7 +18,6 @@ public class UILives : MonoBehaviour
         this.gameLogic = GameObject.Find("GameLogic").GetComponent<GameLogic>();
 
         //Start Lives
-        Debug.Log(this.gameLogic.Player);
         SetLivesText(this.gameLogic.Player.LifeCounter());
 
         //After Falling

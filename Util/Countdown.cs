@@ -20,7 +20,11 @@ namespace DefaultNamespace.Util
         public float CurrentTime
         {
             get => (int) currentTime; //konvertiere float in int für ganze Zahlen!
-            set => currentTime = value;
+        }
+
+        public float StartTime
+        {
+            get => startTime;
         }
 
         public void Run()
