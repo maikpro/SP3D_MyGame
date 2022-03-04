@@ -32,6 +32,7 @@ public class EnemyController : MonoBehaviour
     
     // Respawn falls Enemy fällt
     private Respawn enemyRespawner;
+    private Rigidbody enemyRigidbody;
     
     // Is PLayer Grounded?
     private bool grounded;
@@ -46,6 +47,7 @@ public class EnemyController : MonoBehaviour
         this.animator = GetComponent<Animator>();
         this.enemyRespawner = new Respawn(gameObject, transform.position);
         this.capsuleCollider = GetComponent<CapsuleCollider>();
+        this.enemyRigidbody = GetComponent<Rigidbody>();
         
         // Enemy 
         this.enemy = new Enemy(new Life(this.enemyLifeCounter, false), GetComponent<NavMeshAgent>(), transform, this.sightRange, this.attackRange, this.walkPointRange);
@@ -93,11 +95,19 @@ public class EnemyController : MonoBehaviour
         else if (state == State.DEAD)
         {
             this.animator.SetBool("isHit", true);
+            Invoke("FallToGround", 2.25f);
             this.enemy.ClearNavMeshDestination();
             Destroy(gameObject,4f); // Zerstöre den Gegner nach 2 Sekunden
         }
     }
 
+    // Set Collider to 0.1 so enemy falls to the ground
+    private void FallToGround()
+    {
+        // Fall to the ground
+        this.capsuleCollider.height = 0.1f;
+    }
+    
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;

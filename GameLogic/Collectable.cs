@@ -15,9 +15,19 @@ public class Collectable : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            int counter = this.gameLogic.GemsCollected;
-            counter++;
-            this.gameLogic.GemsCollected = counter;
+            // Wenn Gems eingesammelt werden
+            if (gameObject.CompareTag("Gems"))
+            {
+                int counter = this.gameLogic.GemsCollected;
+                counter++;
+                this.gameLogic.GemsCollected = counter;
+            }
+
+            if (gameObject.CompareTag("Shield"))
+            {
+                this.gameLogic.AddShield();
+            }
+            
             gameObject.SetActive(false);
         }
     }

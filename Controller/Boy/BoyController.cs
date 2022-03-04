@@ -43,6 +43,7 @@ public class BoyController : MonoBehaviour
     private CapsuleCollider capsuleCollider;
     private Player player;
     private bool grounded;
+    private float colliderHeight; 
     
     // Damage 
     private bool isHit;
@@ -86,6 +87,8 @@ public class BoyController : MonoBehaviour
         this.capsuleCollider = GetComponent<CapsuleCollider>();
         this.gameLogic = GameObject.Find("GameLogic").GetComponent<GameLogic>();
         this.player = this.gameLogic.Player;
+
+        this.colliderHeight = this.capsuleCollider.height;
     }
 
     // Update is called once per frame
@@ -118,6 +121,7 @@ public class BoyController : MonoBehaviour
         
         // BOXING / FIGHTING
         // Input.GetKey(KeyCode.Q
+        // Input.GetKey(KeyCode.Mouse1)
         if (Input.GetKey(KeyCode.Mouse1))
         {
             this.command = new AttackCommand(this.animator, this.attackPoint, this.attackRange, this.attackLayers);
@@ -164,11 +168,16 @@ public class BoyController : MonoBehaviour
 
         if (this.isHit)
         {
-            this.animator.SetBool("isHit", true);
-
+            // Player Hit by enemy
+            if (!this.player.HasShield)
+            {
+                this.animator.SetBool("isHit", true);
+                Invoke("FallToGround", 1f);
+                this.boyRigidbody.constraints = RigidbodyConstraints.FreezeAll;
+            }
+            
             Debug.Log("isHit!");
             this.gameLogic.PlayerHitByEnemy();
-            this.boyRigidbody.constraints = RigidbodyConstraints.FreezeAll;
         }
         else
         {
@@ -179,7 +188,15 @@ public class BoyController : MonoBehaviour
         if (this.gameLogic.IsInvoking("Respawn"))
         {
             this.boySkin.color = damageMaterial.color;
+            this.capsuleCollider.height = this.colliderHeight;
         }
+    }
+    
+    // Set Collider to 0.1 so enemy falls to the ground
+    private void FallToGround()
+    {
+        // Fall to the ground
+        this.capsuleCollider.height = 0.1f;
     }
     
     private void OnDrawGizmosSelected()

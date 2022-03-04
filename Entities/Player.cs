@@ -4,11 +4,13 @@
     {
         private Life life;
         private bool isAttacking;
-
-        public Player(Life life, bool isAttacking)
+        private bool hasShield;
+        
+        public Player(Life life, bool hasShield, bool isAttacking)
         {
             this.life = life;
             this.isAttacking = isAttacking;
+            this.hasShield = hasShield;
         }
 
         public bool IsAttacking
@@ -23,6 +25,12 @@
             set => life = value;
         }
 
+        public bool HasShield
+        {
+            get => hasShield;
+            set => hasShield = value;
+        }
+
         public int LifeCounter()
         {
             return this.life.Counter;
@@ -30,7 +38,10 @@
 
         public void TakesDamage(int damage)
         {
-            this.life.Minus(damage);
+            if (!this.hasShield)
+            { 
+                this.life.Minus(damage); 
+            }
         }
 
         public void LifeBonus(int bonus)

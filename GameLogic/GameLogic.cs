@@ -2,6 +2,7 @@ using System;
 using DefaultNamespace;
 using DefaultNamespace.Controller.Boy;
 using UnityEngine;
+using Object = System.Object;
 
 public class GameLogic : MonoBehaviour
 {
@@ -14,25 +15,23 @@ public class GameLogic : MonoBehaviour
     [SerializeField] 
     [Range(1,99)]
     private int gemsCollected;
+
+    [SerializeField] 
+    private bool playerHasShield;
     
     //PRIVATE FIELDS
     private BoyController boyController;
     private Respawn boyRespawner;
     private Player player;
     
+    // Objects
+    private DestructableObject[] checkPoints;
+    
     // EVENTS
     public event Action OnLifeUpdate; // Action for Respawn after Falling 
     public event Action OnCollect; // Action for Collection of Gems
 
-    public event Action OnCheckPointReached;
-
-    // TODO OnDead Animation
-    // TODO Fight with Enemy
-
-    // TODO Checkpoints
-    
-    // TODO RESPAWNER EVENT!!
-    
+    public event Action OnChangeShieldStatus; // Action for Collection of Shields // Only 1 Shield possible cause of bool usage!!!
     
     public Player Player
     {
@@ -61,11 +60,30 @@ public class GameLogic : MonoBehaviour
     void Awake()
     {
         this.boyController = GameObject.Find("Boy").GetComponent<BoyController>();
-        this.player = new Player(new Life(this.playerLifeCounter, false), false);
+        this.player = new Player(new Life(this.playerLifeCounter, false), this.playerHasShield, false);
         this.boyRespawner = new Respawn(this.boyController.gameObject, transform.position);
         this.boyRespawner.SetStartPosition(new Vector3(219.809998f,0f,2.41199994f));
+    }
+
+    void Start()
+    {
+        // IMPORTANT GAMELOGIC MUST BE SET BEFORE!!!
+        //this.destructableObject = GameObject.Find("DestructableObject").GetComponent<DestructableObject>();
+        this.checkPoints = FindObjectsOfType<DestructableObject>();
         
-        // Spawn Enemies
+        
+        // Subscribe to Event OnCheckPointReached from DestructableObject
+        //this.destructableObject.OnCheckPointReached += DestructableObjectOnCheckPointReached;
+        foreach (var checkpoint in this.checkPoints)
+        {
+            checkpoint.OnCheckPointReached += DestructableObjectOnCheckPointReached;
+        }
+    }
+
+    private void DestructableObjectOnCheckPointReached()
+    {
+        // Set new StartPoint aka Checkpoint!
+        this.boyRespawner.SetStartPosition(this.boyController.gameObject.transform.position);
     }
 
     // Update is called once per frame
@@ -76,7 +94,7 @@ public class GameLogic : MonoBehaviour
         {
             MinusLife();
         }
-        
+
     }
 
     private void Respawn()
@@ -90,7 +108,16 @@ public class GameLogic : MonoBehaviour
     {
         MinusLife();
         this.boyController.IsHit = false;
-        Invoke("Respawn", 1.5f);
+        
+        // Disable Shield after Attack
+        if (this.Player.HasShield)
+        {
+            RemoveShield();
+        }
+        else
+        {
+            Invoke("Respawn", 1.5f);
+        }
     }
 
     public void MinusLife()
@@ -99,11 +126,23 @@ public class GameLogic : MonoBehaviour
         this.player.TakesDamage(1);
         OnLifeUpdate?.Invoke();
     }
-
+    
     private void BonusLife()
     {
         this.player.LifeBonus(1);
         OnLifeUpdate?.Invoke();
         this.GemsCollected = 0;
+    }
+
+    public void AddShield()
+    {
+        this.player.HasShield = true;
+        OnChangeShieldStatus?.Invoke();
+    }
+
+    public void RemoveShield()
+    {
+        this.player.HasShield = false;
+        OnChangeShieldStatus?.Invoke();
     }
 }

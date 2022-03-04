@@ -94,6 +94,8 @@ public class ExplodingBox : MonoBehaviour
 
         GameObject effect = Instantiate(this.explosionEffect, transform.position + (Vector3.up*0.5f), transform.rotation);
         
+        SoundManager.PlaySound();
+        
         foreach (Transform child in brokenPieces.transform)
         {
             if (child.TryGetComponent<Rigidbody>(out Rigidbody childRigidbody))

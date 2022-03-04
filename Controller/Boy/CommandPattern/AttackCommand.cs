@@ -72,7 +72,6 @@ namespace Camera.Player.CommandPattern
                 
                 else if (collider.CompareTag("DestructableBox"))
                 {
-                    Debug.Log("WOAAW");
                     DestructableObject destructableObject = collider.GetComponent<DestructableObject>();
                     destructableObject.OnAttackDestroy();
                 }
@@ -93,7 +92,8 @@ namespace Camera.Player.CommandPattern
                 gameLogic.MinusLife();*/
                 
                 // Hitting Animation Player
-                collider.GetComponent<BoyController>().IsHit = true;
+                BoyController boyController = collider.GetComponent<BoyController>();
+                boyController.IsHit = true;
             }
         }
     }

@@ -6,7 +6,7 @@ public class UIGems : MonoBehaviour
     private GameLogic gameLogic;
     private string gemsCollectedText;
 
-    public void SetGemsCollectedText(int gemsCollectedText)
+    private void SetGemsCollectedText(int gemsCollectedText)
     {
         GetComponent<Text>().text = "x" + gemsCollectedText;
     }
