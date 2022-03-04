@@ -14,7 +14,7 @@ namespace DefaultNamespace
             SetStartPosition(startPosition);
         }
 
-        private void Execute()
+        public void Execute()
         {
             this.respawnObject.transform.position = this.startPosition;
         }

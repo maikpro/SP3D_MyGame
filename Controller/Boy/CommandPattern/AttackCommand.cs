@@ -89,9 +89,11 @@ namespace Camera.Player.CommandPattern
                 Debug.Log("enemy ATTACKED " + collider.name);
                 
                 // Damage Player
-                GameLogic gameLogic = GameObject.Find("GameLogic").GetComponent<GameLogic>();
-                gameLogic.MinusLife();
+                /*GameLogic gameLogic = GameObject.Find("GameLogic").GetComponent<GameLogic>();
+                gameLogic.MinusLife();*/
                 
+                // Hitting Animation Player
+                collider.GetComponent<BoyController>().IsHit = true;
             }
         }
     }

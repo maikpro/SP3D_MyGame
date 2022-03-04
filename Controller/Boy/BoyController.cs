@@ -27,6 +27,14 @@ public class BoyController : MonoBehaviour
     private Transform attackPoint;
     [SerializeField] private float attackRange;
     [SerializeField] private LayerMask attackLayers;
+
+    [Header("Damage")] 
+    [SerializeField] 
+    private Material boySkin;
+    [SerializeField]
+    private Material damageMaterial;
+    [SerializeField]
+    private Material defaultMaterial;
     
     // Privat
     private Animator animator;
@@ -35,6 +43,11 @@ public class BoyController : MonoBehaviour
     private CapsuleCollider capsuleCollider;
     private Player player;
     private bool grounded;
+    
+    // Damage 
+    private bool isHit;
+    private Renderer skinnedMeshRenderer;
+   
     
     // Steuerung
     private float xDirection;
@@ -58,6 +71,12 @@ public class BoyController : MonoBehaviour
         get => boyRigidbody; // Für Knockback beim Enemy Hit
     }
 
+    public bool IsHit
+    {
+        get => isHit;
+        set => isHit = value;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -73,7 +92,7 @@ public class BoyController : MonoBehaviour
     void Update()
     {
         this.grounded = GroundChecker.IsGrounded(this.capsuleCollider);
-        GroundedAnimation();
+        Animation();
         
         CameraPosition();
         InputHandler();
@@ -129,7 +148,7 @@ public class BoyController : MonoBehaviour
         this.cameraRight = this.cameraRight.normalized;
     }
 
-    void GroundedAnimation()
+    void Animation()
     {
         if (this.grounded)
         {
@@ -141,6 +160,25 @@ public class BoyController : MonoBehaviour
         {
             this.animator.SetBool("isFalling", true);
             this.animator.SetBool("Grounded", false);
+        }
+
+        if (this.isHit)
+        {
+            this.animator.SetBool("isHit", true);
+
+            Debug.Log("isHit!");
+            this.gameLogic.PlayerHitByEnemy();
+            this.boyRigidbody.constraints = RigidbodyConstraints.FreezeAll;
+        }
+        else
+        {
+            this.animator.SetBool("isHit", false);
+            this.boySkin.color = defaultMaterial.color;
+        }
+        
+        if (this.gameLogic.IsInvoking("Respawn"))
+        {
+            this.boySkin.color = damageMaterial.color;
         }
     }
     

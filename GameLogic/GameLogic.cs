@@ -24,6 +24,8 @@ public class GameLogic : MonoBehaviour
     public event Action OnLifeUpdate; // Action for Respawn after Falling 
     public event Action OnCollect; // Action for Collection of Gems
 
+    public event Action OnCheckPointReached;
+
     // TODO OnDead Animation
     // TODO Fight with Enemy
 
@@ -36,7 +38,7 @@ public class GameLogic : MonoBehaviour
     {
         get => player;
         set => player = value;
-        }
+    }
 
     public int GemsCollected
     {
@@ -75,6 +77,20 @@ public class GameLogic : MonoBehaviour
             MinusLife();
         }
         
+    }
+
+    private void Respawn()
+    {
+        this.boyRespawner.Execute();
+        this.boyController.BoyRigidbody.constraints = RigidbodyConstraints.None;
+        this.boyController.BoyRigidbody.constraints = RigidbodyConstraints.FreezeRotation;
+    }
+
+    public void PlayerHitByEnemy()
+    {
+        MinusLife();
+        this.boyController.IsHit = false;
+        Invoke("Respawn", 1.5f);
     }
 
     public void MinusLife()

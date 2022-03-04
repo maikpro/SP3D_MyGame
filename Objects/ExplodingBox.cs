@@ -4,19 +4,29 @@ using UnityEngine;
 
 public class ExplodingBox : MonoBehaviour
 {
+    [Header("Time")]
     [SerializeField] private float timeToExplode;
+    [SerializeField] private float dissolveTime;
 
+    [Header("Object")]
     [SerializeField] 
     private GameObject brokenObject;
 
+    [Header("Effect")]
     [SerializeField] 
     private GameObject explosionEffect;
 
-    [SerializeField] private float dissolveTime;
+    [Header("Material")]
+    [SerializeField] private Material defaultMaterial;
+    [SerializeField] private Color touchedColor;
     
     private bool isTouched;
     private Countdown countdown;
 
+    private Material material;
+    private bool isMaterialChanged;
+
+    
     private bool isExploding;
 
     public bool IsExploding
@@ -28,8 +38,13 @@ public class ExplodingBox : MonoBehaviour
     void Start()
     {
         this.isTouched = false;
+        this.isMaterialChanged = false;
         this.isExploding = false;
         this.countdown = new Countdown(this.timeToExplode);
+
+        this.material = GetComponent<MeshRenderer>().material;
+        
+        //this.material.color = Color.magenta;
     }
 
     void Update()
@@ -37,7 +52,18 @@ public class ExplodingBox : MonoBehaviour
         if (isTouched)
         {
             this.countdown.Run();
-            //Debug.Log(this.countdown.CurrentTime);
+            
+            // Change Material every Sec
+            if (!this.isMaterialChanged && (this.countdown.CurrentTime % 2 == 0))
+            {
+                this.material.color = this.touchedColor;
+                this.isMaterialChanged = true;
+            }
+            else
+            {
+                this.material.color = this.defaultMaterial.color;
+                this.isMaterialChanged = false;
+            }
         }
 
         if (this.countdown.CurrentTime == 0)
