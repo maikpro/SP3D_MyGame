@@ -20,8 +20,6 @@ public class UILives : MonoBehaviour
         //Start Lives
         SetLivesText(this.gameLogic.Player.LifeCounter());
 
-        //After Falling
-
         this.gameLogic.OnLifeUpdate += GameLogicOnLifeUpdate;
     }
 

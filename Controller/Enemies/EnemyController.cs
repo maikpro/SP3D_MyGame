@@ -95,9 +95,9 @@ public class EnemyController : MonoBehaviour
         else if (state == State.DEAD)
         {
             this.animator.SetBool("isHit", true);
-            Invoke("FallToGround", 2.25f);
+            Invoke("FallToGround", 1f);
             this.enemy.ClearNavMeshDestination();
-            Destroy(gameObject,4f); // Zerstöre den Gegner nach 2 Sekunden
+            Destroy(gameObject,3f); // Zerstöre den Gegner nach 2 Sekunden
         }
     }
 
@@ -106,6 +106,8 @@ public class EnemyController : MonoBehaviour
     {
         // Fall to the ground
         this.capsuleCollider.height = 0.1f;
+
+        this.enemyRigidbody.isKinematic = false;
     }
     
     private void OnDrawGizmosSelected()

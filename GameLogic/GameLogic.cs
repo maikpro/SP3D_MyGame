@@ -54,6 +54,11 @@ public class GameLogic : MonoBehaviour
             {
                 BonusLife();
             }
+            else
+            {
+                // Play basic sound 
+                SoundManager.PlaySound(SoundManager.Sound.GemCollected, this.boyController.transform.position);
+            }
         }
     }
 
@@ -62,7 +67,9 @@ public class GameLogic : MonoBehaviour
         this.boyController = GameObject.Find("Boy").GetComponent<BoyController>();
         this.player = new Player(new Life(this.playerLifeCounter, false), this.playerHasShield, false);
         this.boyRespawner = new Respawn(this.boyController.gameObject, transform.position);
-        this.boyRespawner.SetStartPosition(new Vector3(219.809998f,0f,2.41199994f));
+        //this.boyRespawner.SetStartPosition(new Vector3(219.809998f,0f,2.41199994f));
+        
+        SoundManager.Initialize();
     }
 
     void Start()
@@ -70,7 +77,7 @@ public class GameLogic : MonoBehaviour
         // IMPORTANT GAMELOGIC MUST BE SET BEFORE!!!
         //this.destructableObject = GameObject.Find("DestructableObject").GetComponent<DestructableObject>();
         this.checkPoints = FindObjectsOfType<DestructableObject>();
-        
+        this.boyRespawner.SetStartPosition(this.boyController.transform.position);
         
         // Subscribe to Event OnCheckPointReached from DestructableObject
         //this.destructableObject.OnCheckPointReached += DestructableObjectOnCheckPointReached;
@@ -104,7 +111,7 @@ public class GameLogic : MonoBehaviour
         this.boyController.BoyRigidbody.constraints = RigidbodyConstraints.FreezeRotation;
     }
 
-    public void PlayerHitByEnemy()
+    public void PlayerHit()
     {
         MinusLife();
         this.boyController.IsHit = false;
@@ -132,12 +139,18 @@ public class GameLogic : MonoBehaviour
         this.player.LifeBonus(1);
         OnLifeUpdate?.Invoke();
         this.GemsCollected = 0;
+        
+        // Level Up Sound
+        SoundManager.PlaySound(SoundManager.Sound.LevelUp, this.boyController.transform.position);
     }
 
     public void AddShield()
     {
         this.player.HasShield = true;
         OnChangeShieldStatus?.Invoke();
+        
+        // Shield Sound
+        SoundManager.PlaySound(SoundManager.Sound.ShieldCollected, this.boyController.transform.position);
     }
 
     public void RemoveShield()

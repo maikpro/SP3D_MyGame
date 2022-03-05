@@ -47,8 +47,8 @@ namespace Camera.Player.CommandPattern
         //Quelle der Attacke: https://www.youtube.com/watch?v=sPiVz1k-fEs
         private void PlayerAttacking()
         {
+
             this.animator.SetBool(attackParameterName, true);
-            
             // Attack
             Collider[] hitColliders = Physics.OverlapSphere(this.attackPoint.position, this.attackRange, this.attackLayers);
 
@@ -64,11 +64,11 @@ namespace Camera.Player.CommandPattern
                     Debug.Log(collider.name + " left " + enemy.Life.Counter);
                 }
                 
-                else if (collider.CompareTag("Player"))
+                /*else if (collider.CompareTag("Player"))
                 {
                     var player = collider.GetComponent<BoyController>().Player;
                     player.TakesDamage(1);
-                }
+                }*/
                 
                 else if (collider.CompareTag("DestructableBox"))
                 {

@@ -1,4 +1,5 @@
 using System;
+using DefaultNamespace.Controller.Enemies;
 using DefaultNamespace.Util;
 using UnityEngine;
 
@@ -11,7 +12,11 @@ public class ExplodingBox : MonoBehaviour
     [Header("Object")]
     [SerializeField] 
     private GameObject brokenObject;
-
+    [SerializeField]
+    private float hitRadius;
+    [SerializeField]
+    private LayerMask hitLayers;
+    
     [Header("Effect")]
     [SerializeField] 
     private GameObject explosionEffect;
@@ -58,6 +63,8 @@ public class ExplodingBox : MonoBehaviour
             {
                 this.material.color = this.touchedColor;
                 this.isMaterialChanged = true;
+                
+                SoundManager.PlaySound(SoundManager.Sound.ExplosionAlarm, transform.position);
             }
             else
             {
@@ -69,6 +76,7 @@ public class ExplodingBox : MonoBehaviour
         if (this.countdown.CurrentTime == 0)
         {
             Explode();
+            SoundManager.PlaySound(SoundManager.Sound.Explosion, transform.position);
         }
     }
 
@@ -94,8 +102,6 @@ public class ExplodingBox : MonoBehaviour
 
         GameObject effect = Instantiate(this.explosionEffect, transform.position + (Vector3.up*0.5f), transform.rotation);
         
-        SoundManager.PlaySound();
-        
         foreach (Transform child in brokenPieces.transform)
         {
             if (child.TryGetComponent<Rigidbody>(out Rigidbody childRigidbody))
@@ -103,10 +109,42 @@ public class ExplodingBox : MonoBehaviour
                 childRigidbody.AddExplosionForce(1f, transform.position, 0.5f);
             }
         }
+        
+        // When Player/Enemy is in exploding range damage him
+        Damage();
                 
         Destroy(brokenPieces, this.dissolveTime);
         Destroy(effect, 1f);
+        
 
         this.isExploding = true;
+    }
+
+    private void Damage()
+    {
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, this.hitRadius, this.hitLayers);
+
+        foreach (Collider collider in hitColliders)
+        {
+            if (collider.CompareTag("Enemy"))
+            {
+                Enemy enemy = collider.GetComponent<EnemyController>().Enemy;
+                enemy.TakesDamage(1);
+                
+                Debug.Log(collider.name + " left " + enemy.Life.Counter);
+            }
+                
+            else if (collider.CompareTag("Player"))
+            {
+                BoyController boyController = collider.GetComponent<BoyController>();
+                boyController.IsHit = true;
+            }
+        }
+    }
+    
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, this.hitRadius);
     }
 }

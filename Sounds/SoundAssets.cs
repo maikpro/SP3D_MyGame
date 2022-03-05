@@ -1,6 +1,10 @@
+using System;
 using UnityEngine;
 
-// Source: CodeMonkey: https://www.youtube.com/watch?v=QL29aTa7J5Q
+/** Source:
+ * CodeMonkey - Simple Sound Manager (Unity Tutorial): https://www.youtube.com/watch?v=QL29aTa7J5Q
+ * CodeMonkey - Quick Tip: Referencing Assets through Code | Unity Tutorial: https://www.youtube.com/watch?v=7GcEW6uwO8E 
+ * */
 public class SoundAssets : MonoBehaviour
 {
     private static SoundAssets _instance;
@@ -14,5 +18,12 @@ public class SoundAssets : MonoBehaviour
         }
     }
 
-    public AudioClip explosion;
+    public SoundAudioClip[] soundAudioClips;
+
+    [Serializable]
+    public class SoundAudioClip         
+    {
+        public SoundManager.Sound sound;
+        public AudioClip audioClip;
+    }
 }

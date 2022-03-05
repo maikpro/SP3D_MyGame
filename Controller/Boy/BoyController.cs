@@ -27,6 +27,8 @@ public class BoyController : MonoBehaviour
     private Transform attackPoint;
     [SerializeField] private float attackRange;
     [SerializeField] private LayerMask attackLayers;
+    [Range(0,10)]
+    [SerializeField] private float attackCooldown;
 
     [Header("Damage")] 
     [SerializeField] 
@@ -43,7 +45,11 @@ public class BoyController : MonoBehaviour
     private CapsuleCollider capsuleCollider;
     private Player player;
     private bool grounded;
-    private float colliderHeight; 
+    private float colliderHeight;
+    
+    // For Attack Cooldown
+    private float lastAttackTime;
+    
     
     // Damage 
     private bool isHit;
@@ -89,6 +95,7 @@ public class BoyController : MonoBehaviour
         this.player = this.gameLogic.Player;
 
         this.colliderHeight = this.capsuleCollider.height;
+        this.lastAttackTime = 0f;
     }
 
     // Update is called once per frame
@@ -119,13 +126,17 @@ public class BoyController : MonoBehaviour
             this.command = new JumpCommand(this.boyRigidbody, this.animator, this.JumpSpeed);
         }
         
+        //lastTimePlayed + delay < Time.time
         // BOXING / FIGHTING
         // Input.GetKey(KeyCode.Q
-        // Input.GetKey(KeyCode.Mouse1)
-        if (Input.GetKey(KeyCode.Mouse1))
+        // Input.GetKey(KeyCode.Mouse1) <<<
+        if (Input.GetMouseButton(1))
         {
             this.command = new AttackCommand(this.animator, this.attackPoint, this.attackRange, this.attackLayers);
             this.player.IsAttacking = true;
+            this.lastAttackTime = Time.time + this.attackCooldown;
+            GameObject soundGameObject = SoundManager.PlaySound(SoundManager.Sound.boyAttack, this.attackPoint.position);
+            Destroy(soundGameObject, 1f);
         }
         
         this.command.Execute();
@@ -177,7 +188,7 @@ public class BoyController : MonoBehaviour
             }
             
             Debug.Log("isHit!");
-            this.gameLogic.PlayerHitByEnemy();
+            this.gameLogic.PlayerHit();
         }
         else
         {
