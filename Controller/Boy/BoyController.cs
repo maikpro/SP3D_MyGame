@@ -46,6 +46,7 @@ public class BoyController : MonoBehaviour
     private Player player;
     private bool grounded;
     private float colliderHeight;
+    private bool isPlayerDancing;
     
     // For Attack Cooldown
     private float lastAttackTime;
@@ -96,6 +97,11 @@ public class BoyController : MonoBehaviour
 
         this.colliderHeight = this.capsuleCollider.height;
         this.lastAttackTime = 0f;
+
+        this.isPlayerDancing = false;
+        
+        DontDestroyOnLoad(gameObject);
+        DontDestroyOnLoad(Camera);
     }
 
     // Update is called once per frame
@@ -114,7 +120,7 @@ public class BoyController : MonoBehaviour
         if (moveDirection != Vector3.zero)
         {
             this.command = new WalkCommand(this.moveDirection, this.boyRigidbody, this.transform, this.animator, this.RotateSpeed, this.MaxAcceleration);
-        }  else
+        }  else if(!isPlayerDancing)
         {
             this.command = new IdleCommand(this.boyRigidbody, this.animator);
             this.player.IsAttacking = false;
@@ -124,6 +130,14 @@ public class BoyController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && this.grounded)
         {
             this.command = new JumpCommand(this.boyRigidbody, this.animator, this.JumpSpeed);
+        }
+        
+        // Dance
+        if (this.isPlayerDancing || Input.GetKey(KeyCode.O))
+        {
+            this.isPlayerDancing = true;
+            this.command = new DanceCommand(this.animator);
+            Invoke("PlayerStopDance", 5f);
         }
         
         //lastTimePlayed + delay < Time.time
@@ -208,6 +222,18 @@ public class BoyController : MonoBehaviour
     {
         // Fall to the ground
         this.capsuleCollider.height = 0.1f;
+    }
+
+    public void PlayerDance()
+    {
+        Debug.Log("LOOOS");
+        this.isPlayerDancing = true;
+        Invoke("PlayerStopDance", 4f);
+    }
+
+    private void PlayerStopDance()
+    {
+        this.isPlayerDancing = false;
     }
     
     private void OnDrawGizmosSelected()

@@ -41,6 +41,9 @@ public class WalkCommand : ICommand
         // Boxing Animation
         this.animator.SetBool(AttackCommand.attackParameterName, false);
         
+        //Dance Animation
+        this.animator.SetBool(DanceCommand.danceParameterName, false);
+        
         if (this.rigidbody.velocity.magnitude < this.maxAcceleration)
         {
             //this.rigidbody.AddForce(this.moveDirection, ForceMode.Impulse);

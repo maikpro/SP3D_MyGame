@@ -21,6 +21,7 @@ public class UILives : MonoBehaviour
         SetLivesText(this.gameLogic.Player.LifeCounter());
 
         this.gameLogic.OnLifeUpdate += GameLogicOnLifeUpdate;
+        
     }
 
     private void GameLogicOnLifeUpdate()

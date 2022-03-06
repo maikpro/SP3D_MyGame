@@ -65,7 +65,7 @@ public class EnemyController : MonoBehaviour
         
         GroundChecker.IsGrounded(this.capsuleCollider);
         
-        this.enemyRespawner.afterFall(transform.position.y, -20);
+        this.enemyRespawner.AfterFall(transform.position.y, this.enemyRespawner.StartPosition.y - 20);
 
         // ANIMATION FÜR ENEMY
         if (enemy.Life.IsDead)

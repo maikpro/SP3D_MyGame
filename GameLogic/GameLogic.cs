@@ -2,7 +2,6 @@ using System;
 using DefaultNamespace;
 using DefaultNamespace.Controller.Boy;
 using UnityEngine;
-using Object = System.Object;
 
 public class GameLogic : MonoBehaviour
 {
@@ -13,7 +12,7 @@ public class GameLogic : MonoBehaviour
     private int playerLifeCounter;
 
     [SerializeField] 
-    [Range(1,99)]
+    [Range(0,99)]
     private int gemsCollected;
 
     [SerializeField] 
@@ -24,6 +23,8 @@ public class GameLogic : MonoBehaviour
     private Respawn boyRespawner;
     private Player player;
     
+    private GoalReached goalReached;
+    
     // Objects
     private DestructableObject[] checkPoints;
     
@@ -32,7 +33,11 @@ public class GameLogic : MonoBehaviour
     public event Action OnCollect; // Action for Collection of Gems
 
     public event Action OnChangeShieldStatus; // Action for Collection of Shields // Only 1 Shield possible cause of bool usage!!!
-    
+    public event Action OnDeadShowCenterText; // Show UI Game Over Text on Event
+    public event Action OnLevelUpCenterText; // Show UI Level Up!
+
+    public event Action OnCheckPointReachedText;
+
     public Player Player
     {
         get => player;
@@ -57,7 +62,8 @@ public class GameLogic : MonoBehaviour
             else
             {
                 // Play basic sound 
-                SoundManager.PlaySound(SoundManager.Sound.GemCollected, this.boyController.transform.position);
+                GameObject soundObject = SoundManager.PlaySound(SoundManager.Sound.GemCollected, this.boyController.transform.position);
+                Destroy(soundObject, 1f);
             }
         }
     }
@@ -68,7 +74,7 @@ public class GameLogic : MonoBehaviour
         this.player = new Player(new Life(this.playerLifeCounter, false), this.playerHasShield, false);
         this.boyRespawner = new Respawn(this.boyController.gameObject, transform.position);
         //this.boyRespawner.SetStartPosition(new Vector3(219.809998f,0f,2.41199994f));
-        
+
         SoundManager.Initialize();
     }
 
@@ -77,7 +83,10 @@ public class GameLogic : MonoBehaviour
         // IMPORTANT GAMELOGIC MUST BE SET BEFORE!!!
         //this.destructableObject = GameObject.Find("DestructableObject").GetComponent<DestructableObject>();
         this.checkPoints = FindObjectsOfType<DestructableObject>();
-        this.boyRespawner.SetStartPosition(this.boyController.transform.position);
+        this.boyRespawner.SetStartPositionAtBegin(this.boyController.transform.position);
+        
+        this.goalReached = GameObject.Find("GoalPlatform").GetComponent<GoalReached>();
+        this.goalReached.OnGoalReached += GoalReachedOnGoalReached;
         
         // Subscribe to Event OnCheckPointReached from DestructableObject
         //this.destructableObject.OnCheckPointReached += DestructableObjectOnCheckPointReached;
@@ -85,20 +94,44 @@ public class GameLogic : MonoBehaviour
         {
             checkpoint.OnCheckPointReached += DestructableObjectOnCheckPointReached;
         }
+        
+        DontDestroyOnLoad(gameObject); // Dont Destroy GameLogic
+        DontDestroyOnLoad(GameObject.Find("UI"));
+    }
+
+    /**
+     * Load Level 2 when Goal is reached after a Dance! :D
+     */
+    private void GoalReachedOnGoalReached()
+    {
+        this.boyController.PlayerDance();
+        Invoke("LoadingAfterDelay",5f);
+        // DoDance
+        
+    }
+
+    private void LoadingAfterDelay()
+    {
+        Loader.Load(Loader.Scene.Level_2);
+        Vector3 nextLevelSpawnPoint = new Vector3(112.658646f,0.0249999762f,6.83869505f);
+        this.boyRespawner.NextLevelSpawnPoint(nextLevelSpawnPoint);
     }
 
     private void DestructableObjectOnCheckPointReached()
     {
+        OnCheckPointReachedText?.Invoke();
+        
         // Set new StartPoint aka Checkpoint!
-        this.boyRespawner.SetStartPosition(this.boyController.gameObject.transform.position);
+        this.boyRespawner.SetCheckPointPosition(this.boyController.gameObject.transform.position);
     }
 
     // Update is called once per frame
     void Update()
     {
         // Respawn after Falling down
-        if (this.boyRespawner.afterFall(this.boyController.gameObject.transform.position.y, -20))
+        if (this.boyRespawner.AfterFall(this.boyController.transform.position.y, this.boyRespawner.StartPosition.y - 20))
         {
+            Debug.Log("Respawn After Fall!");
             MinusLife();
         }
 
@@ -131,14 +164,41 @@ public class GameLogic : MonoBehaviour
     {
         //minus life
         this.player.TakesDamage(1);
+        
+        if (this.player.Life.CheckIfDead())
+        {
+            OnDeadShowCenterText?.Invoke(); //Zeige an dass Spieler gestorben ist.
+            Invoke("PlayerDead", 5f);
+        }
+        
         OnLifeUpdate?.Invoke();
     }
-    
-    private void BonusLife()
+
+    /*
+     * When Player dies
+     * respawn him at the startposition
+     * and give him startlives back!
+     */
+    private void PlayerDead()
+    {
+        this.boyRespawner.BackToStartPosition();
+        this.player = new Player(new Life(this.playerLifeCounter, false), this.playerHasShield, false);
+        OnLifeUpdate?.Invoke(); // Update UI nochmal
+        
+        // Restart Level
+        //Application.LoadLevel(Application.loadedLevel);
+        //Loader.Load(Loader.Scene.Level_1);
+        Loader.ReloadCurrentLevel();
+    }
+
+    public void BonusLife()
     {
         this.player.LifeBonus(1);
         OnLifeUpdate?.Invoke();
-        this.GemsCollected = 0;
+        
+        if(this.GemsCollected > 99) this.GemsCollected = 0;
+        
+        OnLevelUpCenterText?.Invoke();
         
         // Level Up Sound
         SoundManager.PlaySound(SoundManager.Sound.LevelUp, this.boyController.transform.position);

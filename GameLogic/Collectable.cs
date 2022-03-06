@@ -27,6 +27,11 @@ public class Collectable : MonoBehaviour
             {
                 this.gameLogic.AddShield();
             }
+
+            if (gameObject.CompareTag("Heart"))
+            {
+                this.gameLogic.BonusLife();
+            }
             
             gameObject.SetActive(false);
         }

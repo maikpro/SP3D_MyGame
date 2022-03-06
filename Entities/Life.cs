@@ -37,13 +37,15 @@ public class Life
         Counter += bonus;
     }
 
-    public void CheckIfDead()
+    public bool CheckIfDead()
     {
         if (Counter <= 0 && !IsDead)
         {
             Debug.Log("Dead!");
             IsDead = true;
         }
+
+        return this.IsDead;
     }
         
 }
