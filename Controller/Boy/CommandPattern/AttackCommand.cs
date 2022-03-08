@@ -4,9 +4,13 @@ using UnityEngine;
 
 namespace Camera.Player.CommandPattern
 {
+    /**
+     * AttackCommand wird aufgerufen im BoyController aufgerufen, sobald der Spieler mit die rechte Maustaste tätigt.
+     * ODER wenn der Gegner angreift!
+     * Hierbei wird ForEnemy als Flag verwendet, um zwischen Spielerangriff und Gegnerangriff zu unterscheiden!
+     */
     public class AttackCommand : ICommand
     {
-        public const string attackParameterName = "isAttacking";
         private Animator animator;
         private Transform attackPoint;
         private float attackRange;
@@ -34,24 +38,34 @@ namespace Camera.Player.CommandPattern
 
         public void Execute()
         {
-            if (this.forEnemy)
+            if (this.forEnemy) // wenn das Flag gestetzt ist, dann greift der Gegner an!
             {
                 EnemyAttacking(); 
             }
-            else
+            else // sonst der Spieler
             {
                 PlayerAttacking();
             }
         }
 
-        //Quelle der Attacke: https://www.youtube.com/watch?v=sPiVz1k-fEs
+        /**
+         * Quelle der Attacke für die Attacke:
+         * Brackeys - MELEE COMBAT in Unity:
+         * https://www.youtube.com/watch?v=sPiVz1k-fEs
+         */
         private void PlayerAttacking()
         {
 
-            this.animator.SetBool(attackParameterName, true);
-            // Attack
+            this.animator.SetBool(GlobalNamingHandler.ATTACK_PARAMETER_NAME, true); // Attack-Animation
+            
+            // Attack, wenn die Sphere mit einem AttackLayer überschneidet, werden diese Objekte in das Array hitColliders gelegt.
             Collider[] hitColliders = Physics.OverlapSphere(this.attackPoint.position, this.attackRange, this.attackLayers);
 
+            /**
+             * Dann werden alle Objekte durchlaufen und es werden die Tags geprüft,
+             * entweder der Spieler schlägt den Gegener oder der Spieler schlägt gegen eine Box
+             * dementsprechend wird dann die passende Methode aufgerufen.
+             */
             foreach (Collider collider in hitColliders)
             {
                 Debug.Log("YOU ATTACKED " + collider.name);
@@ -63,13 +77,7 @@ namespace Camera.Player.CommandPattern
                 
                     Debug.Log(collider.name + " left " + enemy.Life.Counter);
                 }
-                
-                /*else if (collider.CompareTag("Player"))
-                {
-                    var player = collider.GetComponent<BoyController>().Player;
-                    player.TakesDamage(1);
-                }*/
-                
+
                 else if (collider.CompareTag("DestructableBox"))
                 {
                     DestructableObject destructableObject = collider.GetComponent<DestructableObject>();
@@ -78,6 +86,10 @@ namespace Camera.Player.CommandPattern
             }
         }
 
+        /**
+         * Gleiches Prinzip wie bei PlayerAttacking nur dass hier der Gegner keine Boxen zerstören kann,
+         * sondern nur den Spieler angreifen kann.
+         */
         private void EnemyAttacking()
         {
             // Attack
@@ -86,11 +98,7 @@ namespace Camera.Player.CommandPattern
             foreach (Collider collider in hitColliders)
             {
                 Debug.Log("enemy ATTACKED " + collider.name);
-                
-                // Damage Player
-                /*GameLogic gameLogic = GameObject.Find("GameLogic").GetComponent<GameLogic>();
-                gameLogic.MinusLife();*/
-                
+
                 // Hitting Animation Player
                 BoyController boyController = collider.GetComponent<BoyController>();
                 boyController.IsHit = true;

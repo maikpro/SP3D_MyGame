@@ -1,18 +1,17 @@
-using System;
 using Camera.Player.CommandPattern;
-using DefaultNamespace.Controller.Boy;
 using UnityEngine;
+
+/**
+ * BoyController ist für die Steuerung des Spielers verantwortlich von hier aus werden die passenden Animationen aufgerufen 
+ */
 
 public class BoyController : MonoBehaviour
 {
     private GameLogic gameLogic;
-    
-    //EVENTS
-    public event Action<bool, int> OnActionEvent;
-    
+
     // Zuweisung per Unity Editor
-    [SerializeField]
-    private Transform Camera;
+    public Transform Camera;
+    
     [Space]
     [SerializeField]
     public float MaxAcceleration;
@@ -43,19 +42,13 @@ public class BoyController : MonoBehaviour
     private Vector3 moveDirection;
     private Rigidbody boyRigidbody;
     private CapsuleCollider capsuleCollider;
-    private Player player;
     private bool grounded;
     private float colliderHeight;
     private bool isPlayerDancing;
     
-    // For Attack Cooldown
-    private float lastAttackTime;
-    
-    
     // Damage 
     private bool isHit;
     private Renderer skinnedMeshRenderer;
-   
     
     // Steuerung
     private float xDirection;
@@ -67,12 +60,6 @@ public class BoyController : MonoBehaviour
 
     // Command Pattern
     private ICommand command;
-
-    public Player Player
-    {
-        get => player;
-        set => player = value;
-    }
 
     public Rigidbody BoyRigidbody
     {
@@ -92,16 +79,13 @@ public class BoyController : MonoBehaviour
         this.boyRigidbody = GetComponent<Rigidbody>();
 
         this.capsuleCollider = GetComponent<CapsuleCollider>();
-        this.gameLogic = GameObject.Find("GameLogic").GetComponent<GameLogic>();
-        this.player = this.gameLogic.Player;
+        this.gameLogic = GameObject.Find(GlobalNamingHandler.GAMEOBJECT_GAMELOGIC).GetComponent<GameLogic>();
 
         this.colliderHeight = this.capsuleCollider.height;
-        this.lastAttackTime = 0f;
 
         this.isPlayerDancing = false;
         
         DontDestroyOnLoad(gameObject);
-        DontDestroyOnLoad(Camera);
     }
 
     // Update is called once per frame
@@ -112,26 +96,26 @@ public class BoyController : MonoBehaviour
         
         CameraPosition();
         InputHandler();
-
+        
         // Geh-Richtung
         this.moveDirection = (this.cameraForward * this.yDirection + this.cameraRight * this.xDirection);
-        
+    
         // GEHEN
-        if (moveDirection != Vector3.zero)
+        if (moveDirection != Vector3.zero && !this.gameLogic.Player.Life.CheckIfDead())
         {
             this.command = new WalkCommand(this.moveDirection, this.boyRigidbody, this.transform, this.animator, this.RotateSpeed, this.MaxAcceleration);
         }  else if(!isPlayerDancing)
         {
             this.command = new IdleCommand(this.boyRigidbody, this.animator);
-            this.player.IsAttacking = false;
+            this.gameLogic.Player.IsAttacking = false;
         }
-        
+    
         // JUMP
         if (Input.GetKeyDown(KeyCode.Space) && this.grounded)
         {
             this.command = new JumpCommand(this.boyRigidbody, this.animator, this.JumpSpeed);
         }
-        
+    
         // Dance
         if (this.isPlayerDancing || Input.GetKey(KeyCode.O))
         {
@@ -140,19 +124,14 @@ public class BoyController : MonoBehaviour
             Invoke("PlayerStopDance", 5f);
         }
         
-        //lastTimePlayed + delay < Time.time
-        // BOXING / FIGHTING
-        // Input.GetKey(KeyCode.Q
-        // Input.GetKey(KeyCode.Mouse1) <<<
         if (Input.GetMouseButton(1))
         {
             this.command = new AttackCommand(this.animator, this.attackPoint, this.attackRange, this.attackLayers);
-            this.player.IsAttacking = true;
-            this.lastAttackTime = Time.time + this.attackCooldown;
+            this.gameLogic.Player.IsAttacking = true;
             GameObject soundGameObject = SoundManager.PlaySound(SoundManager.Sound.boyAttack, this.attackPoint.position);
             Destroy(soundGameObject, 1f);
         }
-        
+    
         this.command.Execute();
     }
 
@@ -181,32 +160,29 @@ public class BoyController : MonoBehaviour
     {
         if (this.grounded)
         {
-            this.animator.SetBool("isJumping", false);
-            this.animator.SetBool("isFalling", false);
-            this.animator.SetBool("Grounded", true);
+            this.animator.SetBool(GlobalNamingHandler.JUMP_PARAMETER_NAME, false);
+            this.animator.SetBool(GlobalNamingHandler.FALL_PARAMETER_NAME, false);
+            this.animator.SetBool(GlobalNamingHandler.GROUNDED_PARAMETER_NAME, true);
         }
-        else
+        else 
         {
-            this.animator.SetBool("isFalling", true);
-            this.animator.SetBool("Grounded", false);
+            this.animator.SetBool(GlobalNamingHandler.FALL_PARAMETER_NAME, true);
+            this.animator.SetBool(GlobalNamingHandler.GROUNDED_PARAMETER_NAME, false);
         }
 
-        if (this.isHit)
+        if (this.isHit && !this.gameLogic.Player.Life.IsDead)
         {
             // Player Hit by enemy
-            if (!this.player.HasShield)
+            if (!this.gameLogic.Player.HasShield)
             {
-                this.animator.SetBool("isHit", true);
+                this.animator.SetBool(GlobalNamingHandler.HIT_PARAMETER_NAME, true);
                 Invoke("FallToGround", 1f);
-                this.boyRigidbody.constraints = RigidbodyConstraints.FreezeAll;
             }
-            
-            Debug.Log("isHit!");
             this.gameLogic.PlayerHit();
         }
-        else
+        else if(!this.gameLogic.Player.Life.CheckIfDead())
         {
-            this.animator.SetBool("isHit", false);
+            this.animator.SetBool(GlobalNamingHandler.HIT_PARAMETER_NAME, false);
             this.boySkin.color = defaultMaterial.color;
         }
         
@@ -214,6 +190,11 @@ public class BoyController : MonoBehaviour
         {
             this.boySkin.color = damageMaterial.color;
             this.capsuleCollider.height = this.colliderHeight;
+        }
+        
+        if (this.gameLogic.Player.Life.CheckIfDead())
+        {
+            this.animator.SetBool(GlobalNamingHandler.HIT_PARAMETER_NAME, true);
         }
     }
     
@@ -226,16 +207,15 @@ public class BoyController : MonoBehaviour
 
     public void PlayerDance()
     {
-        Debug.Log("LOOOS");
         this.isPlayerDancing = true;
         Invoke("PlayerStopDance", 4f);
     }
 
-    private void PlayerStopDance()
+    public void PlayerStopDance()
     {
         this.isPlayerDancing = false;
     }
-    
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.magenta;

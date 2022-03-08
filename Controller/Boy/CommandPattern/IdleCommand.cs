@@ -2,6 +2,9 @@
 
 namespace Camera.Player.CommandPattern
 {
+    /**
+     * Idle wird aufgerufen, wenn der Spieler keine anderen Commandos eingibt, wie Laufen oder Springen
+     */
     public class IdleCommand : ICommand
     {
         private Rigidbody rigidbody;
@@ -21,9 +24,11 @@ namespace Camera.Player.CommandPattern
         private void Idle()
         {
             this.rigidbody.AddForce(Vector3.zero, ForceMode.Acceleration);
-            this.animator.SetBool(WalkCommand.walkParameterName, false);
-            this.animator.SetBool(AttackCommand.attackParameterName, false);
-            this.animator.SetBool(DanceCommand.danceParameterName, false);
+            
+            // Animationen
+            this.animator.SetBool(GlobalNamingHandler.WALK_PARAMETER_NAME, false);
+            this.animator.SetBool(GlobalNamingHandler.ATTACK_PARAMETER_NAME, false);
+            this.animator.SetBool(GlobalNamingHandler.DANCE_PARAMETER_NAME, false);
         }
     }
 }

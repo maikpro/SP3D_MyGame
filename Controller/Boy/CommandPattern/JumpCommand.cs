@@ -1,10 +1,10 @@
-using Camera.Player.CommandPattern;
 using UnityEngine;
 
+/**
+ * JumpCommand wird ausgeführt wenn der Spieler die Leertaste tätigt
+ */
 public class JumpCommand : ICommand
 {
-    public const string jumpParameterName = "isJumping";
-
     private Rigidbody rigidbody;
     private Animator animator;
     private float jumpSpeed;
@@ -24,9 +24,9 @@ public class JumpCommand : ICommand
     private void Jump()
     {
         this.rigidbody.AddForce(Vector3.up * jumpSpeed, ForceMode.Impulse);
-        this.animator.SetBool(jumpParameterName, true);
+        this.animator.SetBool(GlobalNamingHandler.JUMP_PARAMETER_NAME, true);
         
         // Boxing Animation
-        this.animator.SetBool(AttackCommand.attackParameterName, false);
+        this.animator.SetBool(GlobalNamingHandler.ATTACK_PARAMETER_NAME, false);
     }
 }

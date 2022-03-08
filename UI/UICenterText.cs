@@ -2,6 +2,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+/**
+ * UICenterText ist für die Textanzeige in der Mitte des Bildschirms zuständig.
+ * Momentan werden Game Over, +1 Bonus Up! und Checkpoint reached angezeigt.
+ */
 public class UICenterText : MonoBehaviour
 {
     private GameLogic gameLogic;
@@ -11,13 +15,13 @@ public class UICenterText : MonoBehaviour
     void Start()
     {
         // IMPORTANT GAMELOGIC MUST BE SET BEFORE!!!
-        this.gameLogic = GameObject.Find("GameLogic").GetComponent<GameLogic>();
+        this.gameLogic = GameObject.Find(GlobalNamingHandler.GAMEOBJECT_GAMELOGIC).GetComponent<GameLogic>();
         
         // After Player is dead show text
-        this.gameLogic.OnDeadShowCenterText += GameLogicOnDeadShowCenterText;
-        this.gameLogic.OnLevelUpCenterText += GameLogicOnLevelUpCenterText;
-        this.gameLogic.OnCheckPointReachedText += GameLogicOnCheckPointReachedText;
-        
+        this.gameLogic.OnDeadShowCenterText += GameLogicOnDeadShowCenterText; // Wenn der Spieler stirbt => Game Over
+        this.gameLogic.OnLevelUpCenterText += GameLogicOnLevelUpCenterText; // Wenn der Spieler ein Lebenspunkt erhält => +1 Bonus Up!
+        this.gameLogic.OnCheckPointReachedText += GameLogicOnCheckPointReachedText; // Wenn der Spieler den Checkpoint zerstört => Checkpoint reached.
+
         this.displayText = GetComponent<Text>();
         this.displayText.enabled = false;
         

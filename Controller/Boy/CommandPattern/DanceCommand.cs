@@ -1,10 +1,12 @@
 
 using UnityEngine;
 
+/**
+ * Das DanceCommando wird beim erreichen der Zielplattform abgespielt oder wenn der Spieler die Taste "o" drückt.
+ * Es ist nicht für den Spielverlauf relevant ist aber ein nice-to-have :D
+ */
 public class DanceCommand : ICommand
 {
-    public const string danceParameterName = "isDancing";
-    
     private Animator animator;
 
     public DanceCommand(Animator animator)
@@ -20,6 +22,6 @@ public class DanceCommand : ICommand
     private void Dance()
     {
         Debug.Log("DAAAAANCE!");
-        this.animator.SetBool(danceParameterName, true);
+        this.animator.SetBool(GlobalNamingHandler.DANCE_PARAMETER_NAME, true);
     }
 }

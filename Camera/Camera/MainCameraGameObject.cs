@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MainCameraGameObject : MonoBehaviour
@@ -24,7 +22,7 @@ public class MainCameraGameObject : MonoBehaviour
     {
         //Distanz zwischen Kamera und target => initial Variable aus Editor 
 
-        //GetMouseButton(0) => linke Maustaste gedrückt, dann soll sich die Kamera bewegen.
+        //GetMouseButton(0) => linke Maustaste gedrï¿½ckt, dann soll sich die Kamera bewegen.
         if (Input.GetMouseButton(0))
         {
             /**
@@ -34,7 +32,7 @@ public class MainCameraGameObject : MonoBehaviour
             mouseY += Input.GetAxis("Mouse Y");
 
             /**
-             * Für die Rotation müssen die Mausachsen ausgelesen und vertauscht werden.
+             * Fï¿½r die Rotation mï¿½ssen die Mausachsen ausgelesen und vertauscht werden.
              * wenn ich die Maus nach rechts oder links bewege dann rotiert die Kamera um die Y-Achse
              * wenn ich die Maus nach oben oder unten bewege dann rotiert die Kamera um die X-Achse
              * Quaternion haben keinen Gimbal-Lock

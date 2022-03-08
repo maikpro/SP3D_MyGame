@@ -1,5 +1,8 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
+
+/**
+ * Ein eigener Countdown für die bessere Verwaltung von Cooldowns
+ */
 
 namespace DefaultNamespace.Util
 {

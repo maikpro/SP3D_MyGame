@@ -4,6 +4,11 @@ using DefaultNamespace.Controller.Enemies;
 using UnityEngine;
 using UnityEngine.AI;
 
+/**
+ * Der EnemyController ist für die Verwaltung der Gegner verantwortlich,
+ * damit werden die nötigen Einstellungen konfiguriert und das passende Verhalten aufgerufen.
+ */
+
 public class EnemyController : MonoBehaviour
 {
     // Privat
@@ -58,6 +63,8 @@ public class EnemyController : MonoBehaviour
     {
         if (!enemy.Life.IsDead)
         {
+            // State-Machine
+            // Solange der Gegner nicht tot ist rufe sein Verhalten auf.
              this.state= this.enemy.Behaviour(); 
         }
         
@@ -73,35 +80,41 @@ public class EnemyController : MonoBehaviour
             state = State.DEAD;
         }
         
+        // Wenn der Spieler in der Sichtweite ist (sightRange) verfolge ihn
         if (state == State.CHASING)
         {
-            this.animator.SetBool("isRunning", true);
-            this.animator.SetBool("isPatrolling", false);  
-            this.animator.SetBool("isAttacking", false);
+            SoundManager.PlaySound(SoundManager.Sound.enemyHey, transform.position);
+            this.animator.SetBool(GlobalNamingHandler.RUNNING_PARAMETER_NAME, true);
+            this.animator.SetBool(GlobalNamingHandler.PATROLLING_PARAMETER_NAME, false);  
+            this.animator.SetBool(GlobalNamingHandler.ATTACK_PARAMETER_NAME, false);
         }  
+        // Wenn der Spieler in Angriffsnähe ist, greife ihn an
         else if (state == State.ATTACK)
         {
-            this.animator.SetBool("isAttacking", true);
-            this.animator.SetBool("isPatrolling", false); 
-            this.animator.SetBool("isRunning", false);
+            this.animator.SetBool(GlobalNamingHandler.ATTACK_PARAMETER_NAME, true);
+            this.animator.SetBool(GlobalNamingHandler.PATROLLING_PARAMETER_NAME, false); 
+            this.animator.SetBool(GlobalNamingHandler.RUNNING_PARAMETER_NAME, false);
             this.attackCommand.Execute();
         }
+        // Wenn der Spieler nicht in Angriffsnähe oder Sichtweite ist Patrolliere
         else if (state == State.PATROLLING)
         {
-            this.animator.SetBool("isPatrolling", true); 
-            this.animator.SetBool("isRunning", false);
-            this.animator.SetBool("isAttacking", false);
+            this.animator.SetBool(GlobalNamingHandler.PATROLLING_PARAMETER_NAME, true); 
+            this.animator.SetBool(GlobalNamingHandler.RUNNING_PARAMETER_NAME, false);
+            this.animator.SetBool(GlobalNamingHandler.ATTACK_PARAMETER_NAME, false);
         }
+        // Wenn der Spieler den Gegner geschlagen hat, stribt der Gegner
         else if (state == State.DEAD)
         {
-            this.animator.SetBool("isHit", true);
+            SoundManager.PlaySound(SoundManager.Sound.enemyUh, transform.position);
+            this.animator.SetBool(GlobalNamingHandler.HIT_PARAMETER_NAME, true);
             Invoke("FallToGround", 1f);
             this.enemy.ClearNavMeshDestination();
             Destroy(gameObject,3f); // Zerstöre den Gegner nach 2 Sekunden
         }
     }
 
-    // Set Collider to 0.1 so enemy falls to the ground
+    // Set Collider to 0.1 so enemy, falls to the ground
     private void FallToGround()
     {
         // Fall to the ground
@@ -110,6 +123,7 @@ public class EnemyController : MonoBehaviour
         this.enemyRigidbody.isKinematic = false;
     }
     
+    // Fürs Debugging der Spheren Angriffs- und Sichtweite anzeigen.
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;

@@ -1,8 +1,13 @@
-﻿using DefaultNamespace.Controller.Boy;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace DefaultNamespace
 {
+    /**
+     * Respawn ist für die richtige Setzung des Respawnpunkts verantwortlich.
+     * Damit kann der nächste Checkpoint oder der Startpunkt gesetzt werden.
+     * Wenn der Spieler fällt oder stirbt, wird der Spieler an dem jeweiligen Punkt zurückgestetzt.
+     */
+    
     public class Respawn
     {
         private GameObject respawnObject;
@@ -35,12 +40,13 @@ namespace DefaultNamespace
             }
         }
 
+        // Wenn der Spieler einen Checkpoint erreicht hat, dann wird er dort Respawnt, falls er ein Lebenspunkt verliert.
         private void BackToCheckpoint()
         {
             this.respawnObject.transform.position = this.checkPointPosition;
         }
         
-        // When Player dies
+        // Wenn der Spieler stirbt (Lebenspunkt = 0) werden alle Checkpoints gelöscht und der Spieler landet im Startpunkt der Szene.
         public void BackToStartPosition()
         {
             this.respawnObject.transform.position = this.startPosition;

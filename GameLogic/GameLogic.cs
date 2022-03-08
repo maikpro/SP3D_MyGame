@@ -3,10 +3,25 @@ using DefaultNamespace;
 using DefaultNamespace.Controller.Boy;
 using UnityEngine;
 
+/**
+ * GameLogic ist für die Verwaltung der Spiellogik verantwortlich
+ * von hier aus werden die Leben des Spielers verwaltet, die Camera zugewiesen und das Laden der Scenen aufgerufen
+ */
+
 public class GameLogic : MonoBehaviour
 {
+    [Header("Camera Settings")] 
+    [SerializeField]
+    private GameObject camera;
+    
     // EDITOR VARIABLES
-    [Header("Player Settings")]
+    [Header("Player Settings")] 
+    [SerializeField]
+    private GameObject startPoint;
+    
+    [SerializeField]
+    private GameObject boy;
+    
     [SerializeField]
     [Range(1,99)]
     private int playerLifeCounter;
@@ -22,13 +37,17 @@ public class GameLogic : MonoBehaviour
     private BoyController boyController;
     private Respawn boyRespawner;
     private Player player;
-    
+    private GameObject boyInstance;
+
     private GoalReached goalReached;
     
     // Objects
     private DestructableObject[] checkPoints;
     
-    // EVENTS
+    /**
+     * EVENTS werden subscribed und werden aufgerufen, wenn ein bestimmtes Ereignis auftritt.
+     * Damit kann die UI von der Gamelogik getrennt werden und der Code bleibt übersichtlicher.
+     */
     public event Action OnLifeUpdate; // Action for Respawn after Falling 
     public event Action OnCollect; // Action for Collection of Gems
 
@@ -52,7 +71,7 @@ public class GameLogic : MonoBehaviour
             gemsCollected = value;
             
             // Collected Gem
-            OnCollect?.Invoke();
+            OnCollect?.Invoke(); // Event wird aufgerufen wenn ein Diamant eingesammelt wird
             
             // If Player has collected 100 Gems give him an extra life and reset gemscounter = 0
             if (this.GemsCollected >= 100)
@@ -70,23 +89,49 @@ public class GameLogic : MonoBehaviour
 
     void Awake()
     {
-        this.boyController = GameObject.Find("Boy").GetComponent<BoyController>();
+        /**
+         * Beim allerersten Laden des Spiels wird der Spieler (boy) instanziiert.
+         * Die Kamera wird dem Spieler und der Spieler der Kamera zugewiesen, damit die Funktionen,
+         * der 3rd Person Kamera funktioniert.
+         */
+        
+        if (GameObject.Find(GlobalNamingHandler.boyName) == null)
+        {
+            // ON FIRST GAMESTART CREATE ALL INSTANCES!
+            this.boyInstance = Instantiate(this.boy, this.startPoint.transform.position, this.startPoint.transform.rotation);
+            Debug.Log(boyInstance.name);
+            GlobalNamingHandler.boyName = this.boyInstance.name;
+        
+            // Camera References on Gamestart!
+            this.boyController = boyInstance.GetComponent<BoyController>();
+            SoundManager.Initialize();
+        }
+        else
+        {
+            // AFTER DEAD REUSE REFERENCES!
+            this.boyController = GameObject.Find(GlobalNamingHandler.boyName).GetComponent<BoyController>();
+            this.camera.GetComponent<MainCameraGameObject>().target = this.boyController.transform;
+        }
+        
+        this.camera.GetComponent<MainCameraGameObject>().target = this.boyController.transform;
+        this.boyController.Camera = this.camera.transform;
+        
         this.player = new Player(new Life(this.playerLifeCounter, false), this.playerHasShield, false);
         this.boyRespawner = new Respawn(this.boyController.gameObject, transform.position);
-        //this.boyRespawner.SetStartPosition(new Vector3(219.809998f,0f,2.41199994f));
-
-        SoundManager.Initialize();
+        
+        // Dont Destroy these GameObjects on reload
+        DontDestroyOnLoad(gameObject); // Dont Destroy GameLogic
+        DontDestroyOnLoad(GameObject.Find(GlobalNamingHandler.GAMEOBJECT_UI));
     }
 
     void Start()
     {
         // IMPORTANT GAMELOGIC MUST BE SET BEFORE!!!
-        //this.destructableObject = GameObject.Find("DestructableObject").GetComponent<DestructableObject>();
         this.checkPoints = FindObjectsOfType<DestructableObject>();
         this.boyRespawner.SetStartPositionAtBegin(this.boyController.transform.position);
         
-        this.goalReached = GameObject.Find("GoalPlatform").GetComponent<GoalReached>();
-        this.goalReached.OnGoalReached += GoalReachedOnGoalReached;
+        this.goalReached = GameObject.Find(GlobalNamingHandler.GAMEOBJECT_GOALPLATTFORM).GetComponent<GoalReached>();
+        this.goalReached.OnGoalReached += GoalReachedOnGoalReached; // Subscribe to GoalReached Event in GoalReached Script
         
         // Subscribe to Event OnCheckPointReached from DestructableObject
         //this.destructableObject.OnCheckPointReached += DestructableObjectOnCheckPointReached;
@@ -94,24 +139,30 @@ public class GameLogic : MonoBehaviour
         {
             checkpoint.OnCheckPointReached += DestructableObjectOnCheckPointReached;
         }
-        
-        DontDestroyOnLoad(gameObject); // Dont Destroy GameLogic
-        DontDestroyOnLoad(GameObject.Find("UI"));
     }
 
     /**
-     * Load Level 2 when Goal is reached after a Dance! :D
+     * Lade Level 2 und wenn das Ziel erreicht ist soll der Spieler tanzen
      */
     private void GoalReachedOnGoalReached()
     {
+        //SoundManager.PlaySound(SoundManager.Sound.Dance, transform.position);
+        AudioSource audioSource = GameObject.Find("Background_Music").GetComponent<AudioSource>(); 
+        audioSource.clip = SoundManager.GetAudioClip(SoundManager.Sound.Dance);
+        audioSource.Play();
         this.boyController.PlayerDance();
         Invoke("LoadingAfterDelay",5f);
         // DoDance
         
     }
 
+    /**
+     * Die Szene von Level_2 wird durch Invoke nach 5 Sekunden geladen.
+     * und der Spieler wird an einem bestimmten Punkt gespawnt.
+     */
     private void LoadingAfterDelay()
     {
+        DontDestroyOnLoad(this.camera);
         Loader.Load(Loader.Scene.Level_2);
         Vector3 nextLevelSpawnPoint = new Vector3(112.658646f,0.0249999762f,6.83869505f);
         this.boyRespawner.NextLevelSpawnPoint(nextLevelSpawnPoint);
@@ -132,18 +183,28 @@ public class GameLogic : MonoBehaviour
         if (this.boyRespawner.AfterFall(this.boyController.transform.position.y, this.boyRespawner.StartPosition.y - 20))
         {
             Debug.Log("Respawn After Fall!");
+            if (this.player.HasShield)
+            {
+                RemoveShield();
+            }
+            
             MinusLife();
         }
 
     }
 
+    /**
+     * Der Spieler wird an dem jeweiligen Checkpoint, wenn dieser aktiviert worden ist zurück gespawnt
+     * oder an den Start wenn kein Checkpoint aktiviert wurde
+     */
     private void Respawn()
     {
         this.boyRespawner.Execute();
-        this.boyController.BoyRigidbody.constraints = RigidbodyConstraints.None;
-        this.boyController.BoyRigidbody.constraints = RigidbodyConstraints.FreezeRotation;
     }
 
+    /**
+     * PlayerHit wird aufgerufen, wenn der Spieler vom Gegener getroffen wird
+     */
     public void PlayerHit()
     {
         MinusLife();
@@ -160,11 +221,16 @@ public class GameLogic : MonoBehaviour
         }
     }
 
+    /**
+     * Zieht dem Spieler ein Leben ab
+     * nachdem er runterfällt oder er von einem Gegner geschlagen wird.
+     */
     public void MinusLife()
     {
-        //minus life
+        // Lebensabzug
         this.player.TakesDamage(1);
         
+        // Prüft ob der Spieler nach Lebensabzug noch genug Leben hat (0 == Dead)
         if (this.player.Life.CheckIfDead())
         {
             OnDeadShowCenterText?.Invoke(); //Zeige an dass Spieler gestorben ist.
@@ -175,22 +241,24 @@ public class GameLogic : MonoBehaviour
     }
 
     /*
-     * When Player dies
-     * respawn him at the startposition
-     * and give him startlives back!
+     * Wenn der Spieler stirbt
+     * respawne ihn an der startposition
+     * und resette alle Leben
      */
     private void PlayerDead()
     {
         this.boyRespawner.BackToStartPosition();
         this.player = new Player(new Life(this.playerLifeCounter, false), this.playerHasShield, false);
         OnLifeUpdate?.Invoke(); // Update UI nochmal
-        
-        // Restart Level
-        //Application.LoadLevel(Application.loadedLevel);
-        //Loader.Load(Loader.Scene.Level_1);
+
+        // Ladet die aktuelle Szene nochmal neu
         Loader.ReloadCurrentLevel();
     }
 
+    /**
+     * Wenn der Spieler 100 Diamanten eingesammelt hat oder ein Herz dann erscheint
+     * im UI ein +1 Bonus Life Text und seine Leben steigen an.
+     */
     public void BonusLife()
     {
         this.player.LifeBonus(1);
@@ -207,9 +275,11 @@ public class GameLogic : MonoBehaviour
     public void AddShield()
     {
         this.player.HasShield = true;
+        
+        // Wemm der Spieler ein Schild eingesammelt hat, dann zeige das Schild oben rechts an.
         OnChangeShieldStatus?.Invoke();
         
-        // Shield Sound
+        // Schild-Sound abspielen
         SoundManager.PlaySound(SoundManager.Sound.ShieldCollected, this.boyController.transform.position);
     }
 

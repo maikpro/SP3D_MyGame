@@ -1,12 +1,19 @@
 using DefaultNamespace.Util;
-using UnityEditor.Timeline.Actions;
 using UnityEngine;
 using UnityEngine.AI;
 
-//QUELLE: https://www.youtube.com/watch?v=UjkSFoLxesw
+/*
+ * QUELLE:
+ * Dave / GameDevelopment - FULL 3D ENEMY AI in 6 MINUTES! || Unity Tutorial:
+ * https://www.youtube.com/watch?v=UjkSFoLxesw
+ */ 
 
-public enum State { PATROLLING, CHASING, ATTACK, DEAD }
+public enum State { PATROLLING, CHASING, ATTACK, DEAD } // State-Machine 
 
+/**
+ * EnemyAI wird für die Steuerung des Gegners verwendet.
+ * Je nach Verhalten werden unterschiedliche Methoden ausgeführt.
+ */
 public class EnemyAI
 {
     protected NavMeshAgent navMeshAgent;
@@ -35,13 +42,13 @@ public class EnemyAI
         this.enemyTransform = enemyTransform;
         this.sightRange = sightRange;
         this.attackRange = attackRange;
-        this.boyController = GameObject.Find("Boy").GetComponent<BoyController>();
+        this.boyController = GameObject.Find(GlobalNamingHandler.boyName).GetComponent<BoyController>();
         
         //Reichweite beim Patrolling
         this.walkPointRange = walkPointRange;
 
-        this.playerLayerMask = LayerMask.GetMask("Player");
-        this.groundLayerMask = LayerMask.GetMask("Ground");
+        this.playerLayerMask = LayerMask.GetMask(GlobalNamingHandler.LAYERMASK_PLAYER);
+        this.groundLayerMask = LayerMask.GetMask(GlobalNamingHandler.LAYERMASK_GROUND);
     }
 
     public State Behaviour()
@@ -49,12 +56,14 @@ public class EnemyAI
         this.playerInSightRange = Physics.CheckSphere(this.enemyTransform.position, this.sightRange, this.playerLayerMask);
         this.playerInAttackRange = Physics.CheckSphere(this.enemyTransform.position, this.attackRange, this.playerLayerMask);
         
+        // Wenn der Spieler nicht in Sichtweite oder in Attacknähe ist dann Patrolliere
         if (!playerInSightRange && !playerInAttackRange)
         {
             Patroling();
             return State.PATROLLING;
         }
         
+        // Wenn der Spieler in Sichtweite ist, dann verfolge den Spieler
         if(playerInSightRange && !playerInAttackRange)
         {
             ChasePlayer();
@@ -62,10 +71,11 @@ public class EnemyAI
         }
 
         Debug.Log(!IsOnCooldown());
+        // Wenn der Spieler in Attacknähe ist dann greife ihn an.
         if (playerInAttackRange && playerInSightRange && !IsOnCooldown())
         {
             AttackPlayer();
-            StartCooldown();
+            StartCooldown(); // Damit der Gegner nicht ständig angreift wird ein Cooldown gestetzt.
             return State.ATTACK;
         }
 
@@ -78,20 +88,27 @@ public class EnemyAI
         return State.CHASING;
     }
 
+    /**
+     * Der Gegner patrolliert wenn der Spieler nicht in der Sichtweite oder Angriffsnähe ist.
+     */
     private void Patroling()
     {
-        if(!this.walkPointSet) SearchWalkPoint();
+        if(!this.walkPointSet) SearchWalkPoint(); // Wenn kein Zielpunkt gesetzt dann suche dir zufällig einen neuen.
 
         if (walkPointSet)
-            this.navMeshAgent.SetDestination(this.walkPoint);
+            this.navMeshAgent.SetDestination(this.walkPoint); // wenn der Zielpunkt gesetzt ist begibt sich der Gegner durch den NavMeshAgents dorthin.
 
-        Vector3 distanceToWalkPoint = enemyTransform.position - walkPoint;
+        Vector3 distanceToWalkPoint = enemyTransform.position - walkPoint; // Die Distance zwischen Start und Zielpunkt wird berechnet
 
         //Reached Walkpoint
-        if (distanceToWalkPoint.magnitude < 1f)
+        if (distanceToWalkPoint.magnitude < 1f) // wenn der Zielpunkt erreicht ist, muss ein neuer Zielpunkt gesucht werden
             this.walkPointSet = false;
     }
 
+    /**
+     * Mit dieser Methode wird für den Gegner der nächste Zielpunkt gesucht.
+     * Damit der Gegner mit dem NavMeshAgnets sich dorthin begeben kann.
+     */
     private void SearchWalkPoint()
     {
         float randomX = Random.Range(-this.walkPointRange, this.walkPointRange);
@@ -101,23 +118,35 @@ public class EnemyAI
         if (Physics.Raycast(this.walkPoint, -enemyTransform.up, 2f, this.groundLayerMask)) this.walkPointSet = true;
     }
 
+    /**
+     * Wird aufgerufen wenn der Spieler sich in der Sichtnähe des Gegners befindet
+     */
     private void ChasePlayer()
     {
         this.enemyTransform.LookAt(this.boyController.transform);
         this.navMeshAgent.SetDestination(this.boyController.gameObject.transform.position);
     }
 
+    /**
+     * Wird aufgerufen, wenn sich der Spieler in Angriffsnähe des Gegners befindet.
+     */
     private void AttackPlayer()
     {
         this.enemyTransform.LookAt(this.boyController.transform);
         this.navMeshAgent.SetDestination(this.boyController.gameObject.transform.position);
     }
 
+    /**
+     * Starte den Cooldown, um keine dauerhaften Angriffe zu erlauben
+     */
     private void StartCooldown()
     {
         this.cooldown = new Countdown(5f);
     }
     
+    /**
+     * Prüfung, ob der Gegner noch im Cooldownmodus ist.
+     */
     private bool IsOnCooldown()
     {
         if (this.cooldown == null) return false;

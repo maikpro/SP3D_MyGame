@@ -1,10 +1,12 @@
 using Camera.Player.CommandPattern;
 using UnityEngine;
 
+/**
+ * WalkCommand wird ausgeführt wenn der Spieler die Tasten AWSD tätigt, dementsprechend bewegt sich der Spieler in die Richtung
+ * in die die Kamera zeigt.
+ */
 public class WalkCommand : ICommand
 {
-    public const string walkParameterName = "isRunning";
-    
     private Vector3 moveDirection;
     private Rigidbody rigidbody;
     private Transform transform;
@@ -36,13 +38,13 @@ public class WalkCommand : ICommand
         transform.rotation = Quaternion.RotateTowards(this.transform.rotation, toRotation, this.rotateSpeed * Time.deltaTime);
         
         // Walk Animation
-        this.animator.SetBool(walkParameterName, true); //Animation beim Gehen
+        this.animator.SetBool(GlobalNamingHandler.WALK_PARAMETER_NAME, true); //Animation beim Gehen
         
         // Boxing Animation
-        this.animator.SetBool(AttackCommand.attackParameterName, false);
+        this.animator.SetBool(GlobalNamingHandler.ATTACK_PARAMETER_NAME, false);
         
         //Dance Animation
-        this.animator.SetBool(DanceCommand.danceParameterName, false);
+        this.animator.SetBool(GlobalNamingHandler.DANCE_PARAMETER_NAME, false);
         
         if (this.rigidbody.velocity.magnitude < this.maxAcceleration)
         {

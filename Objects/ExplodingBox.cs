@@ -1,8 +1,10 @@
-using System;
 using DefaultNamespace.Controller.Enemies;
 using DefaultNamespace.Util;
 using UnityEngine;
 
+/**
+ * ExplodingBox ist für die Objekte, die explodieren sollen, sobald der Spieler den Gegenstand berührt.
+ */
 public class ExplodingBox : MonoBehaviour
 {
     [Header("Time")]
@@ -56,19 +58,19 @@ public class ExplodingBox : MonoBehaviour
     {
         if (isTouched)
         {
-            this.countdown.Run();
+            this.countdown.Run(); // Startet den Countdown der Bombe, wenn der Spieler die Box berührt.
             
             // Change Material every Sec
             if (!this.isMaterialChanged && (this.countdown.CurrentTime % 2 == 0))
             {
-                this.material.color = this.touchedColor;
+                this.material.color = this.touchedColor; // Ändert die Farbe der Box alle 2 Sekunden
                 this.isMaterialChanged = true;
                 
-                SoundManager.PlaySound(SoundManager.Sound.ExplosionAlarm, transform.position);
+                SoundManager.PlaySound(SoundManager.Sound.ExplosionAlarm, transform.position); // Spielt einen Alarm-Sound ab, wenn der Spieler die Box berührt hat
             }
             else
             {
-                this.material.color = this.defaultMaterial.color;
+                this.material.color = this.defaultMaterial.color; // Standardfarbe zum Hin und Her wechseln der Farbe
                 this.isMaterialChanged = false;
             }
         }
@@ -76,25 +78,30 @@ public class ExplodingBox : MonoBehaviour
         if (this.countdown.CurrentTime == 0)
         {
             Explode();
-            SoundManager.PlaySound(SoundManager.Sound.Explosion, transform.position);
+            SoundManager.PlaySound(SoundManager.Sound.Explosion, transform.position); // Explosions-Sound
         }
     }
 
     private void OnCollisionEnter(Collision other)
     {
         // wenn der Player die Box berührt geht der Countdown für die Explosion los
-        if (other.gameObject.CompareTag("Player"))
+        if (other.gameObject.CompareTag(GlobalNamingHandler.TAG_PLAYER))
         {
             this.isTouched = true;
         }
         
         // wenn eine ExplosionBox neben einer anderen ExplosionBox steht, die explodiert dann explodiere auch:
-        if (other.gameObject.CompareTag("ExplodingBox"))
+        if (other.gameObject.CompareTag(GlobalNamingHandler.TAG_EXPLODING_BOX))
         {
             Explode();
         }
     }
 
+    /**
+     * Wenn die Box explodiert, wird diese Methode aufgerufen, dabei wird das gleiche Prinzip wie bei DestructableObject genutzt.
+     * Eine zerstörte Box wird instanziiert und von der Box ersetzt, dann fliegen die Teile in die Luft.
+     * Hierbei wird ein Explosionseffect angezeigt.
+     */
     private void Explode()
     {
         Destroy(this.gameObject);
@@ -113,20 +120,23 @@ public class ExplodingBox : MonoBehaviour
         // When Player/Enemy is in exploding range damage him
         Damage();
                 
-        Destroy(brokenPieces, this.dissolveTime);
-        Destroy(effect, 1f);
+        Destroy(brokenPieces, this.dissolveTime); //Löse BoxStücke auf
+        Destroy(effect, 1f); // Löse Explsionseffect auf
         
 
         this.isExploding = true;
     }
 
+    /**
+     * Wenn der Spieler oder ein Gegner in der Nähe der Explosion sind, dann füge ihnen einen Schaden zu.
+     */
     private void Damage()
     {
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, this.hitRadius, this.hitLayers);
 
         foreach (Collider collider in hitColliders)
         {
-            if (collider.CompareTag("Enemy"))
+            if (collider.CompareTag(GlobalNamingHandler.TAG_ENEMY))
             {
                 Enemy enemy = collider.GetComponent<EnemyController>().Enemy;
                 enemy.TakesDamage(1);
@@ -134,7 +144,7 @@ public class ExplodingBox : MonoBehaviour
                 Debug.Log(collider.name + " left " + enemy.Life.Counter);
             }
                 
-            else if (collider.CompareTag("Player"))
+            else if (collider.CompareTag(GlobalNamingHandler.TAG_PLAYER))
             {
                 BoyController boyController = collider.GetComponent<BoyController>();
                 boyController.IsHit = true;

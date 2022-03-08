@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+/**
+ * UILives ist für die Lebenspunkte oben rechts vernantwortlich
+ */
 public class UILives : MonoBehaviour
 {
     private GameLogic gameLogic;
@@ -15,12 +18,12 @@ public class UILives : MonoBehaviour
     void Start()
     {
         // IMPORTANT GAMELOGIC MUST BE SET BEFORE!!!
-        this.gameLogic = GameObject.Find("GameLogic").GetComponent<GameLogic>();
+        this.gameLogic = GameObject.Find(GlobalNamingHandler.GAMEOBJECT_GAMELOGIC).GetComponent<GameLogic>();
 
         //Start Lives
         SetLivesText(this.gameLogic.Player.LifeCounter());
 
-        this.gameLogic.OnLifeUpdate += GameLogicOnLifeUpdate;
+        this.gameLogic.OnLifeUpdate += GameLogicOnLifeUpdate; // Ändern sich die Lebenspunkte wird das Event in GameLogic aufgerufen und die Lebensanzeige wird aktualisiert
         
     }
 

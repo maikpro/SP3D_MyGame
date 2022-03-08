@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/**
+ * UIShield zeigt an, ob der Spieler einen Schild hat oben rechts.
+ * Der Schild schützt den Spieler vor dem nächsten Angriff des Gegeners.
+ */
 public class UIShield : MonoBehaviour
 {
     private GameLogic gameLogic;
@@ -16,9 +20,9 @@ public class UIShield : MonoBehaviour
     void Start()
     {
         // IMPORTANT GAMELOGIC MUST BE SET BEFORE!!!
-        this.gameLogic = GameObject.Find("GameLogic").GetComponent<GameLogic>();
+        this.gameLogic = GameObject.Find(GlobalNamingHandler.GAMEOBJECT_GAMELOGIC).GetComponent<GameLogic>();
         
-        this.gameLogic.OnChangeShieldStatus += GameLogicOnChangeShieldStatus;
+        this.gameLogic.OnChangeShieldStatus += GameLogicOnChangeShieldStatus; // Wenn das Event aufgerufen wird, wird die Anzeige des Schilds geändert.
 
         SetHasShieldUI();
     }

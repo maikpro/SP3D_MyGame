@@ -33,9 +33,11 @@ Nice to Have:
 
 ## Sounds:
 
-- Explosion 1: Olivier Girardot https://assetstore.unity.com/packages/audio/sound-fx/free-sound-effects-pack-155776
+- Explosion 1: Olivier Girardot - https://assetstore.unity.com/packages/audio/sound-fx/free-sound-effects-pack-155776
 - mixkit-classic-alarm-995: Classic alarm - https://mixkit.co/free-sound-effects/technology/
-- Dustyroom - FREE Casual Game SFX Pack, https://assetstore.unity.com/packages/audio/sound-fx/free-casual-game-sfx-pack-54116
+- Dustyroom - FREE Casual Game SFX Pack - https://assetstore.unity.com/packages/audio/sound-fx/free-casual-game-sfx-pack-54116
+- Big Impact with Wood Hits - https://freesfx.co.uk/sfx/wood
+- hey - https://www.pacdv.com/sounds/voices/hey.wav (Tonhöhe gepitched mit Audacity)
 
 ### Terrain Tools:
 
