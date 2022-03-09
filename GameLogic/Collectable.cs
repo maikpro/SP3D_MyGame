@@ -5,6 +5,11 @@ using UnityEngine;
  * Je nach eingesammelten Gegenstand vom Spieler wird die zugehörige Methode aufgerufen.
  * Nach einsammeln des Gegenstandes verschwindet dieser.
  */
+
+/**
+ * Video hat die Idee geliefert:
+ * Ketra Games - How to Collect Items (Unity Tutorial), https://www.youtube.com/watch?v=EfUCEwKmcjc
+ */
 public class Collectable : MonoBehaviour
 {
     private GameLogic gameLogic;

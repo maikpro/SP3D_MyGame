@@ -29,7 +29,7 @@ public class UICenterText : MonoBehaviour
 
     private void GameLogicOnCheckPointReachedText()
     {
-        SetCenterText("Checkpoint reached", Color.green, 5f);
+        SetCenterText("Checkpoint reached", Color.white, 5f);
     }
 
     private void GameLogicOnLevelUpCenterText()

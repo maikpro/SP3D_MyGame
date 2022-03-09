@@ -18,6 +18,11 @@ public class DestructableObject : MonoBehaviour
     
     public event Action OnCheckPointReached; // Wenn das Objekt zerstört wird und ein Checkpoint ist, dann wird der Respawnpunkt neu gesetzt.
 
+    /**
+     * Für die Zerstörung des Objekt wurden die Videos als Quelle verwendet:
+     * Code Monkey - Awesome Easy DESTRUCTION in Unity! (Add SECRETS!), https://www.youtube.com/watch?v=tPWMZ4Ic7PA
+     * Code Monkey - SLICE objects, CUT doors or BREAK them inside Unity!, https://www.youtube.com/watch?v=InpKZloVk0w
+     */
     public void OnAttackDestroy()
     {
         Destroy(this.gameObject);

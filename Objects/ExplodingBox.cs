@@ -102,6 +102,13 @@ public class ExplodingBox : MonoBehaviour
      * Eine zerstörte Box wird instanziiert und von der Box ersetzt, dann fliegen die Teile in die Luft.
      * Hierbei wird ein Explosionseffect angezeigt.
      */
+    
+    /**
+     * Wie in DestructableObject.cs
+     * Für die Zerstörung des Objekt wurden die Videos als Quelle verwendet:
+     * Code Monkey - Awesome Easy DESTRUCTION in Unity! (Add SECRETS!), https://www.youtube.com/watch?v=tPWMZ4Ic7PA
+     * Code Monkey - SLICE objects, CUT doors or BREAK them inside Unity!, https://www.youtube.com/watch?v=InpKZloVk0w
+     */
     private void Explode()
     {
         Destroy(this.gameObject);
