@@ -2,7 +2,7 @@
 
 ## Video
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/MeaE2bVG_8A" title="Sams Fantasy World" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[![Sams Fantasy World](https://yt-embed.herokuapp.com/embed?v=MeaE2bVG_8A)](https://www.youtube.com/watch?v=MeaE2bVG_8A "Sams Fantasy World")
 
 ## Projektteilnehmer:
 
